@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="암산연습">
+<title>PSAT 자료해석 암산연습</title>
+<link rel="manifest" href='data:application/json,{"name":"PSAT 암산연습","short_name":"암산연습","start_url":".","display":"standalone","background_color":"%23111111","theme_color":"%23111111","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect width=%22192%22 height=%22192%22 rx=%2236%22 fill=%22%23111%22/%3E%3Crect y=%2228%22 x=%2216%22 width=%22160%22 height=%2244%22 rx=%228%22 fill=%22%23FFD400%22/%3E%3Ctext x=%2296%22 y=%22150%22 font-size=%2280%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22%23fff%22 text-anchor=%22middle%22%3E123%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"}]}'>
+<style>
+  :root{
+    --bg:#111; --card:#1c1c1e; --card2:#26262a; --line:#38383c;
+    --yellow:#FFD400; --txt:#fff; --sub:#9a9aa2; --green:#34c759; --red:#ff453a; --blue:#0a84ff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    -webkit-user-select:none; user-select:none; overflow-x:hidden;
+  }
+  #app{max-width:520px; margin:0 auto; min-height:100%; padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px);}
+  h1{font-size:26px;font-weight:800;letter-spacing:-.5px;margin:18px 0 2px}
+  h1 .hl{background:var(--yellow);color:#111;padding:0 8px;border-radius:6px}
+  .sub{color:var(--sub);font-size:13px;margin-bottom:18px}
+  .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+  .row{display:flex;gap:10px;margin-bottom:12px}
+  .row>*{flex:1}
+  .row .btn{margin-bottom:0}
+  .btn{
+    background:var(--card2);color:var(--txt);border:none;border-radius:14px;
+    padding:16px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;
+    width:100%;transition:transform .05s; text-align:left; margin-bottom:12px;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--yellow);color:#111}
+  .btn.big{padding:22px 18px;font-size:18px}
+  .btn .t{font-size:17px;font-weight:700}
+  .btn .d{font-size:12px;color:var(--sub);margin-top:3px;font-weight:500}
+  .btn.primary .d{color:#5a5300}
+  .btn.center{text-align:center}
+  .sec-title{font-size:13px;color:var(--sub);font-weight:700;margin:18px 4px 8px;text-transform:uppercase;letter-spacing:.5px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .stat{background:var(--card);border-radius:14px;padding:14px;text-align:center}
+  .stat .n{font-size:24px;font-weight:800}
+  .stat .l{font-size:11px;color:var(--sub);margin-top:2px}
+  .back{background:none;border:none;color:var(--yellow);font-size:16px;font-weight:600;padding:14px 0;cursor:pointer;font-family:inherit}
+  .chip{display:inline-block;background:var(--card2);border-radius:20px;padding:6px 12px;font-size:13px;margin:0 6px 6px 0;font-weight:600}
+  .chip.on{background:var(--yellow);color:#111}
+  /* session */
+  .prog{display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px;color:var(--sub);font-size:14px;font-weight:600}
+  .timer{font-variant-numeric:tabular-nums;font-weight:800;color:var(--yellow);font-size:18px}
+  .pbar{height:6px;background:var(--card2);border-radius:3px;overflow:hidden;margin-bottom:26px}
+  .pbar>div{height:100%;background:var(--yellow);width:0;transition:width .2s}
+  .qbox{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:14px}
+  .qtext{font-size:40px;font-weight:800;letter-spacing:.5px;font-variant-numeric:tabular-nums;text-align:center}
+  .qtag{color:var(--sub);font-size:13px;font-weight:700;margin-bottom:14px}
+  .ans{font-size:34px;font-weight:800;min-height:46px;color:var(--yellow);font-variant-numeric:tabular-nums;letter-spacing:1px}
+  .ans .ph{color:var(--line)}
+  /* fraction */
+  .cmp{display:flex;align-items:center;justify-content:center;gap:18px;font-size:34px;font-weight:800}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05}
+  .frac .n{padding:0 6px}
+  .frac .d{padding:0 6px;border-top:3px solid var(--txt)}
+  .qmark{color:var(--yellow);font-size:30px}
+  .mul{font-variant-numeric:tabular-nums}
+  /* keypad */
+  .keys{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .key,.cmpbtn,.btn,.seg button,.cmpbtn{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+  .key{background:var(--card2);border:none;border-radius:14px;padding:20px 0;font-size:26px;font-weight:700;color:var(--txt);font-family:inherit;cursor:pointer}
+  .key:active{background:#3a3a40}
+  .key.wide{grid-column:span 1}
+  .key.clr{color:var(--red);font-weight:800}
+  .cmpbtns{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .cmpbtn{background:var(--card2);border:none;border-radius:16px;padding:30px 0;font-size:40px;font-weight:800;color:var(--txt);font-family:inherit;cursor:pointer}
+  .cmpbtn:active{background:var(--yellow);color:#111}
+  .flash-ok{animation:fok .35s}
+  .flash-no{animation:fno .35s}
+  @keyframes fok{0%,100%{background:var(--card)}40%{background:rgba(52,199,89,.28)}}
+  @keyframes fno{0%,100%{background:var(--card)}40%{background:rgba(255,69,58,.28)}}
+  /* result */
+  .grade{font-size:80px;font-weight:900;text-align:center;line-height:1;margin:10px 0}
+  .gS{color:#ffd400}.gA{color:#34c759}.gB{color:#0a84ff}.gC{color:#ff9f0a}.gD{color:#ff453a}
+  .pb-tag{display:inline-block;background:var(--yellow);color:#111;font-weight:800;font-size:13px;padding:5px 12px;border-radius:20px}
+  .wrong{background:var(--card);border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+  .wrong .q{font-weight:700;font-variant-numeric:tabular-nums}
+  .wrong .yr{color:var(--red);font-weight:600}
+  .wrong .cr{color:var(--green);font-weight:700}
+  .muted{color:var(--sub);font-size:13px;text-align:center;padding:8px}
+  svg.chart{width:100%;height:120px;display:block}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--yellow);color:#111;font-weight:700;padding:12px 20px;border-radius:24px;font-size:14px;opacity:0;transition:opacity .2s;z-index:50;pointer-events:none}
+  .toast.show{opacity:1}
+  .seg{display:flex;background:var(--card2);border-radius:12px;padding:4px;gap:4px}
+  .seg button{flex:1;background:none;border:none;color:var(--sub);font-weight:700;padding:9px;border-radius:9px;font-family:inherit;font-size:14px;cursor:pointer}
+  .seg button.on{background:var(--yellow);color:#111}
+  .hint{color:var(--sub);font-size:12px;line-height:1.5;margin-top:6px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ================= 데이터: 문제 유형 정의 ================= */
+// sec: [S,A,B,C] — 문제 1개당 목표시간(초). D는 C 초과. (교재 등급표 비례환산)
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+function fAdd2(){const a=R(10,99),b=R(10,99);return calc(`${a} + ${b}`,a+b);}
+function fSub2(){let a=R(10,99),b=R(10,99);if(b>a)[a,b]=[b,a];return calc(`${a} − ${b}`,a-b);}
+function fAddSub2(){return Math.random()<.5?fAdd2():fSub2();}
+function fAdd4(){const a=R(1000,9999),b=R(1000,9999);return calc(`${a} + ${b}`,a+b);}
+function fSub4(){let a=R(1000,9999),b=R(1000,9999);if(b>a)[a,b]=[b,a];return calc(`${a} − ${b}`,a-b);}
+function fMultiAdd(){const n=[R(10,99),R(10,99),R(10,99),R(10,99),R(10,99)];return calc(n.join(' + '),n.reduce((x,y)=>x+y,0));}
+function fMul2x1(){const a=R(11,99),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
+function fMul3x1(){const a=R(100,999),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
+function fMul4x1(){const a=R(1000,9999),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
+function fMulX5(){const a=R(120,980)*2/2, b=pick([5,15,25]);const x=R(24,196)*(pick([5,10,15,20]));return calc(`${x} × ${b}`,x*b);}
+function fMul1019(){const a=R(11,29),b=R(11,29);return calc(`${a} × ${b}`,a*b);}
+function fMul11(){if(Math.random()<.5){const a=R(11,99),b=11;return calc(`${a} × 11`,a*11);}
+  // 십등일합: 십의자리 같고 일의자리 합=10  (예 27×23)
+  const t=R(1,9), o=R(1,9); const a=t*10+o, b=t*10+(10-o); return calc(`${a} × ${b}`,a*b);}
+function fMul2x2(){const a=R(11,99),b=R(11,99);return calc(`${a} × ${b}`,a*b);}
+
+function calc(text,answer){return {mode:'number',text,answer};}
+
+// 분수비교: 두 분수를 가깝게 생성 → 실전형 대소판단
+function fFracCmp(){
+  let a=R(10,300), b=R(20,400);
+  const val=a/b; const factor=1+R(-25,25)/100;
+  let d=R(20,400); let c=Math.round(val*factor*d);
+  if(c<1)c=1;
+  if(a*d===c*b)c+=1; // 동일 방지
+  const ans = (a*d>c*b)?'>':'<';
+  return {mode:'cmp', left:{n:a,d:b}, right:{n:c,d:d}, kind:'frac', answer:ans};
+}
+// 곱셈비교: a×b vs c×d (소수 섞임)
+function fMulCmp(){
+  const dec=Math.random()<.5;
+  let a=R(1000,9999), b= dec? R(200,999)/10 : R(20,99);
+  const val=a*b; const factor=1+R(-18,18)/100;
+  let c=R(1000,9999); let d=Math.round(val*factor/c);
+  if(dec) d=Math.round(val*factor/c*10)/10;
+  if(d<10)d=R(20,99); if(d>99&&!dec)d=R(20,99);
+  const lp=a*b, rp=c*d;
+  if(lp===rp)return fMulCmp();
+  const ans=(lp>rp)?'>':'<';
+  return {mode:'cmp', left:{a,b}, right:{c,d}, kind:'mul', answer:ans};
+}
+
+const TYPES=[
+  {id:'addsub2',part:1,name:'두 자리 덧셈·뺄셈',ex:'36 + 55 / 53 − 31',gen:fAddSub2,sec:[1.75,2,2.25,2.5],def:20},
+  {id:'add4',part:1,name:'네 자리 덧셈',ex:'3666 + 2768',gen:fAdd4,sec:[3.75,4.4,5,5.6],def:8},
+  {id:'sub4',part:1,name:'네 자리 뺄셈',ex:'7851 − 3399',gen:fSub4,sec:[5.6,6.25,6.9,7.5],def:8},
+  {id:'multiadd',part:1,name:'여러 수 덧셈',ex:'41+35+29+33+31',gen:fMultiAdd,sec:[7.5,8.3,9.2,10],def:6},
+  {id:'mul2x1',part:1,name:'두 자리 × 한 자리',ex:'98 × 6',gen:fMul2x1,sec:[1.75,2,2.25,2.5],def:20},
+  {id:'mul3x1',part:1,name:'세 자리 × 한 자리',ex:'381 × 7',gen:fMul3x1,sec:[9,10,11,12],def:10},
+  {id:'mul4x1',part:1,name:'네 자리 × 한 자리',ex:'4084 × 4',gen:fMul4x1,sec:[21,24,27,30],def:10},
+  {id:'mulx5',part:1,name:'×5·15·25 (단위깨기)',ex:'315 × 15',gen:fMulX5,sec:[4,4.5,5,5.5],def:12},
+  {id:'mul1019',part:1,name:'10·20단 곱셈',ex:'14 × 15',gen:fMul1019,sec:[2,2.25,2.5,2.75],def:20},
+  {id:'mul11',part:1,name:'11단·십등일합',ex:'26 × 11 / 27 × 23',gen:fMul11,sec:[2,2.25,2.5,2.75],def:20},
+  {id:'mul2x2',part:1,name:'두 자리 × 두 자리',ex:'94 × 35',gen:fMul2x2,sec:[10.5,12,13.5,15],def:20},
+  {id:'fraccmp',part:2,name:'분수 비교',ex:'33/46  □  41/46',gen:fFracCmp,sec:[7,10,12,15],def:12},
+  {id:'mulcmp',part:2,name:'곱셈 비교',ex:'7300×30.8 □ 8600×25.4',gen:fMulCmp,sec:[10,13,16,20],def:10},
+];
+const TYPE=id=>TYPES.find(t=>t.id===id);
+
+/* ================= 저장소 ================= */
+const KEY='psatcalc_v1';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
+function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+function db(){const d=load();d.records=d.records||{};d.streak=d.streak||{last:null,days:0};d.totalSolved=d.totalSolved||0;return d;}
+function today(){const t=new Date();return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();}
+function yesterday(){const t=new Date();t.setDate(t.getDate()-1);return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();}
+
+function saveSession(typeId,rec){
+  const d=db();
+  (d.records[typeId]=d.records[typeId]||[]).push(rec);
+  if(d.records[typeId].length>60)d.records[typeId]=d.records[typeId].slice(-60);
+  // streak
+  const td=today();
+  if(d.streak.last!==td){ d.streak.days = (d.streak.last===yesterday())? d.streak.days+1 : 1; d.streak.last=td; }
+  d.totalSolved += rec.total;
+  save(d);
+}
+function bestPerProblem(typeId){
+  const d=db(); const h=d.records[typeId]; if(!h||!h.length)return null;
+  const perfect=h.filter(r=>r.correct===r.total&&!r.partial).map(r=>r.sec/r.total); // 전부 정답·완주 세션만
+  if(!perfect.length)return null;
+  return Math.min(...perfect);
+}
+
+/* ================= 등급 ================= */
+function gradeOf(problems, elapsed){
+  const th=[0,0,0,0];
+  problems.forEach(p=>{const s=p._sec; for(let i=0;i<4;i++)th[i]+=s[i];});
+  if(elapsed<=th[0])return'S'; if(elapsed<=th[1])return'A';
+  if(elapsed<=th[2])return'B'; if(elapsed<=th[3])return'C'; return'D';
+}
+function thresholds(problems){const th=[0,0,0,0];problems.forEach(p=>{for(let i=0;i<4;i++)th[i]+=p._sec[i]});return th;}
+
+/* ================= 상태 ================= */
+let S={};
+
+/* ================= 화면 ================= */
+const app=()=>document.getElementById('app');
+function go(fn){window.scrollTo(0,0);fn();}
+
+function screenHome(){
+  const d=db();
+  const solvedToday=(()=>{let n=0;Object.values(d.records).forEach(h=>h.forEach(r=>{if(r.date===today())n+=r.total}));return n;})();
+  app().innerHTML=`
+    <h1><span class="hl">암산</span> 연습</h1>
+    <div class="sub">PSAT 자료해석 · 오프라인 속도훈련</div>
+    <div class="grid3">
+      <div class="stat"><div class="n">${d.streak.days||0}<span style="font-size:14px">일</span></div><div class="l">🔥 연속</div></div>
+      <div class="stat"><div class="n">${solvedToday}</div><div class="l">오늘 푼 문제</div></div>
+      <div class="stat"><div class="n">${d.totalSolved||0}</div><div class="l">누적 문제</div></div>
+    </div>
+    <div class="sec-title">모드 선택</div>
+    <button class="btn primary big" id="m1"><div class="t">🎯 스킬 드릴</div><div class="d">한 유형만 집중 반복 (13가지 유형)</div></button>
+    <button class="btn big" id="m2"><div class="t">🔀 복합 훈련</div><div class="d">여러 유형 섞은 실전 세트 (WOD식)</div></button>
+    <button class="btn big" id="m3"><div class="t">📈 기록실</div><div class="d">유형별 최고기록·성장그래프</div></button>
+    <div class="hint">💡 사파리/크롬 메뉴 → "홈 화면에 추가"하면 앱처럼 실행됩니다. 기록은 이 폰에 저장돼요.</div>
+  `;
+  document.getElementById('m1').onclick=()=>go(screenDrillMenu);
+  document.getElementById('m2').onclick=()=>go(screenComplexMenu);
+  document.getElementById('m3').onclick=()=>go(()=>screenRecords());
+}
+
+function screenDrillMenu(){
+  const p1=TYPES.filter(t=>t.part===1), p2=TYPES.filter(t=>t.part===2);
+  const card=t=>{const bp=bestPerProblem(t.id);
+    return `<button class="btn" data-id="${t.id}"><div class="t">${t.name}</div><div class="d">${t.ex}${bp?`　·　최고 ${bp.toFixed(1)}초/문제`:''}</div></button>`;};
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 홈</button>
+    <h1>스킬 드릴</h1><div class="sub">한 유형을 반사적으로 나올 때까지</div>
+    <div class="sec-title">PART 01 · 사칙연산</div>${p1.map(card).join('')}
+    <div class="sec-title">PART 02 · 분수·곱셈 비교 (PSAT 핵심)</div>${p2.map(card).join('')}
+  `;
+  document.getElementById('bk').onclick=()=>go(screenHome);
+  app().querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>go(()=>screenSetup(b.dataset.id)));
+}
+
+function screenSetup(typeId){
+  const t=TYPE(typeId);
+  S.counts=S.counts||{};
+  const cur=S.counts[typeId]||t.def;
+  const opts=[Math.max(5,Math.round(t.def/2)),t.def,t.def*2];
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 유형선택</button>
+    <h1>${t.name}</h1><div class="sub">${t.ex}</div>
+    <div class="card">
+      <div class="sec-title" style="margin-top:0">문제 수</div>
+      <div class="seg" id="seg">${opts.map(o=>`<button data-c="${o}" class="${o===cur?'on':''}">${o}문제</button>`).join('')}</div>
+      <div class="hint">목표시간: S ${(t.sec[0]*cur).toFixed(0)}초 · A ${(t.sec[1]*cur).toFixed(0)}초 · B ${(t.sec[2]*cur).toFixed(0)}초 · C ${(t.sec[3]*cur).toFixed(0)}초 (기준: 교재 등급표)</div>
+    </div>
+    <button class="btn primary big center" id="start">시작 ▶</button>
+  `;
+  let count=cur;
+  document.getElementById('bk').onclick=()=>go(screenDrillMenu);
+  app().querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{
+    count=+b.dataset.c; S.counts[typeId]=count;
+    app().querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));
+    app().querySelector('.hint').innerHTML=`목표시간: S ${(t.sec[0]*count).toFixed(0)}초 · A ${(t.sec[1]*count).toFixed(0)}초 · B ${(t.sec[2]*count).toFixed(0)}초 · C ${(t.sec[3]*count).toFixed(0)}초 (기준: 교재 등급표)`;
+  });
+  document.getElementById('start').onclick=()=>{
+    const probs=[];for(let i=0;i<count;i++){const p=t.gen();p._sec=t.sec;p._type=t.name;probs.push(p);}
+    startSession(probs,{title:t.name,backTo:()=>screenSetup(typeId),typeId});
+  };
+}
+
+function screenComplexMenu(){
+  S.cx=S.cx||{count:20,scope:'all'};
+  const scopes=[
+    {k:'all',t:'전체 통합',d:'계산+비교 전부 (실전형)'},
+    {k:'calc',t:'계산만',d:'덧뺄·곱셈'},
+    {k:'cmp',t:'비교만',d:'분수·곱셈 비교 (PSAT 핵심)'},
+  ];
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 홈</button>
+    <h1>복합 훈련</h1><div class="sub">여러 유형을 난이도순으로 섞은 한 세트</div>
+    <div class="card"><div class="sec-title" style="margin-top:0">구성</div>
+      ${scopes.map(s=>`<button class="btn" data-k="${s.k}" style="margin-bottom:8px"><div class="t">${s.t}</div><div class="d">${s.d}</div></button>`).join('')}
+    </div>
+    <div class="card"><div class="sec-title" style="margin-top:0">문제 수</div>
+      <div class="seg" id="seg">${[10,20,30].map(o=>`<button data-c="${o}" class="${o===S.cx.count?'on':''}">${o}문제</button>`).join('')}</div>
+    </div>
+  `;
+  document.getElementById('bk').onclick=()=>go(screenHome);
+  app().querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{S.cx.count=+b.dataset.c;app().querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));});
+  app().querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>{
+    S.cx.scope=b.dataset.k; startComplex();
+  });
+}
+function startComplex(){
+  const n=S.cx.count, scope=S.cx.scope;
+  let pool;
+  if(scope==='calc')pool=TYPES.filter(t=>t.part===1);
+  else if(scope==='cmp')pool=TYPES.filter(t=>t.part===2);
+  else pool=TYPES.slice();
+  // 난이도순 정렬용 가중치(sec 합)
+  const order=t=>t.sec[0];
+  const probs=[];
+  for(let i=0;i<n;i++){const t=pick(pool);const p=t.gen();p._sec=t.sec;p._type=t.name;p._ord=order(t);probs.push(p);}
+  probs.sort((a,b)=>a._ord-b._ord); // 쉬움→어려움
+  startSession(probs,{title:'복합 훈련',backTo:screenComplexMenu,typeId:'complex_'+scope});
+}
+
+/* ================= 세션 진행 ================= */
+function startSession(problems,meta){
+  S.sess={problems,meta,i:0,wrong:[],correct:0,start:Date.now(),timer:null};
+  renderSession();
+  S.sess.timer=setInterval(updTimer,200);
+}
+function fmt(ms){const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function updTimer(){const e=document.getElementById('timer');if(e)e.textContent=fmt(Date.now()-S.sess.start);}
+function renderSession(){
+  const s=S.sess, p=s.problems[s.i], t=s.problems.length;
+  s._lock=false; // 새 문제 → 제출 잠금 해제
+  const pct=Math.round(s.i/t*100);
+  let qhtml,input;
+  if(p.mode==='number'){
+    qhtml=`<div class="qtag">${p._type}</div><div class="qtext">${p.text} =</div><div class="ans" id="ans"><span class="ph">?</span></div>`;
+    input=`<div class="keys">
+      ${[7,8,9,4,5,6,1,2,3].map(k=>`<button class="key" data-k="${k}">${k}</button>`).join('')}
+      <button class="key clr" data-k="clear">C</button>
+      <button class="key" data-k="0">0</button>
+      <button class="key del" data-k="del">⌫</button>
+    </div>`;
+  }else{
+    qhtml=`<div class="qtag">${p._type}</div>`+ (p.kind==='frac'
+      ? `<div class="cmp">${frac(p.left.n,p.left.d)}<span class="qmark">?</span>${frac(p.right.n,p.right.d)}</div>`
+      : `<div class="cmp"><span class="mul">${p.left.a} × ${p.left.b}</span><span class="qmark">?</span><span class="mul">${p.right.c} × ${p.right.d}</span></div>`);
+    input=`<div class="cmpbtns"><button class="cmpbtn" data-c="&lt;">&lt;</button><button class="cmpbtn" data-c="&gt;">&gt;</button></div>`;
+  }
+  app().innerHTML=`
+    <div class="prog"><span>${s.i+1} / ${t}</span><span class="timer" id="timer">00:00</span>
+      <span><button class="back" id="quit" style="padding:0;font-size:14px">종료</button></span></div>
+    <div class="pbar"><div style="width:${pct}%"></div></div>
+    <div class="qbox" id="qbox">${qhtml}</div>
+    ${input}
+  `;
+  document.getElementById('quit').onclick=()=>finishSession(true);
+  if(p.mode==='number'){
+    S.typed='';
+    app().querySelectorAll('.key').forEach(b=>b.onpointerdown=ev=>{ev.preventDefault();keyPress(b.dataset.k);});
+    document.onkeydown=e=>{if(e.key>='0'&&e.key<='9')keyPress(e.key);else if(e.key==='Backspace')keyPress('del');else if(e.key==='Escape'||e.key==='Delete'||e.key.toLowerCase()==='c')keyPress('clear');};
+  }else{
+    document.onkeydown=null;
+    app().querySelectorAll('.cmpbtn').forEach(b=>b.onpointerdown=ev=>{ev.preventDefault();submit(b.dataset.c);});
+  }
+}
+function frac(n,d){return `<span class="frac"><span class="n">${n}</span><span class="d">${d}</span></span>`;}
+function keyPress(k){
+  if(k==='del')S.typed=S.typed.slice(0,-1);   // ⌫ 한 글자 지움
+  else if(k==='clear')S.typed='';             // C 전체 지움
+  else{if(S.typed.length<7)S.typed+=k;}
+  const a=document.getElementById('ans');
+  if(a)a.innerHTML=S.typed===''?'<span class="ph">?</span>':S.typed;
+  // 정답을 입력하면 자동으로 다음 문제로 (정답일 때만)
+  if(k!=='del' && k!=='clear' && S.typed!==''){
+    const p=S.sess.problems[S.sess.i];
+    if(parseInt(S.typed,10)===p.answer) submit(p.answer);
+  }
+}
+function submit(val){
+  const s=S.sess; if(!s||s._lock)return; s._lock=true; // 중복 제출 방지
+  const p=s.problems[s.i];
+  const ok = (p.mode==='number')? (val===p.answer) : (val===p.answer);
+  if(ok)s.correct++;
+  else s.wrong.push({q:p.mode==='number'?p.text+' =':cmpText(p), your:p.mode==='number'?val:val, correct:p.answer});
+  const box=document.getElementById('qbox');
+  box.className='qbox '+(ok?'flash-ok':'flash-no');
+  // 짧은 피드백 후 다음
+  const delay=ok?150:650;
+  if(!ok){ // 오답이면 정답 잠깐 표시
+    const tag=box.querySelector('.qtag');
+    const info=document.createElement('div');info.style.cssText='color:var(--red);font-weight:700;margin-top:10px;font-size:15px';
+    info.textContent='정답: '+(p.mode==='number'?p.answer:p.answer);
+    box.appendChild(info);
+  }
+  setTimeout(()=>{
+    s.i++;
+    if(s.i>=s.problems.length)finishSession();
+    else renderSession();
+  },delay);
+}
+function cmpText(p){return p.kind==='frac'?`${p.left.n}/${p.left.d} ? ${p.right.n}/${p.right.d}`:`${p.left.a}×${p.left.b} ? ${p.right.c}×${p.right.d}`;}
+
+function finishSession(early){
+  const s=S.sess;clearInterval(s.timer);document.onkeydown=null;
+  const answered=s.i; // 실제로 푼 문제 수
+  if(early && answered===0){ go(s.meta.backTo); return; } // 하나도 안 풀고 종료 → 그냥 나감
+  const elapsed=(Date.now()-s.start)/1000;
+  const subset=s.problems.slice(0,answered); // 푼 문제만 채점 기준
+  const g=gradeOf(subset,elapsed);
+  const total=answered;
+  const rec={date:today(),ts:Date.now(),sec:Math.round(elapsed*10)/10,total,correct:s.correct,grade:g,partial:!!early};
+  const tid=s.meta.typeId;
+  const prevBest=bestPerProblem(tid);
+  let isPB=false;
+  if(!early){ // 전체 완주만 정식 기록·최고기록으로 저장
+    saveSession(tid,rec);
+    const nowPer=elapsed/total;
+    isPB=(s.correct===total)&&(prevBest===null||nowPer<prevBest);
+  }
+  screenResult(rec,g,isPB,prevBest,s.wrong,s.meta,early);
+}
+
+function screenResult(rec,g,isPB,prevBest,wrong,meta,early){
+  const acc=Math.round(rec.correct/rec.total*100);
+  const per=(rec.sec/rec.total).toFixed(1);
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 홈</button>
+    <h1>${meta.title}</h1>
+    ${early?`<div style="text-align:center;margin:-4px 0 10px"><span class="chip" style="background:var(--card2)">⏸ 중단 · 푼 ${rec.total}문제만 채점 (기록엔 미저장)</span></div>`:''}
+    <div class="grade g${g}">${g}</div>
+    ${isPB?`<div style="text-align:center;margin-bottom:12px"><span class="pb-tag">🎉 신기록! ${prevBest?prevBest.toFixed(1)+'→':''}${per}초/문제</span></div>`:''}
+    <div class="grid3">
+      <div class="stat"><div class="n">${fmt(rec.sec*1000)}</div><div class="l">걸린 시간</div></div>
+      <div class="stat"><div class="n">${acc}%</div><div class="l">정답률 (${rec.correct}/${rec.total})</div></div>
+      <div class="stat"><div class="n">${per}<span style="font-size:13px">초</span></div><div class="l">문제당</div></div>
+    </div>
+    ${wrong.length?`<div class="sec-title">틀린 문제 (${wrong.length})</div>${wrong.map(w=>`
+      <div class="wrong"><span class="q">${w.q}</span><span><span class="yr">내 답 ${w.your}</span> → <span class="cr">${w.correct}</span></span></div>`).join('')}`:`<div class="muted" style="margin-top:16px">✅ 전부 정답!</div>`}
+    <div style="height:12px"></div>
+    <button class="btn primary big center" id="again">다시 풀기 🔄</button>
+    <button class="btn big center" id="rec">이 유형 기록 보기 📈</button>
+    <button class="btn center" id="home">홈으로</button>
+  `;
+  document.getElementById('bk').onclick=()=>go(screenHome);
+  document.getElementById('home').onclick=()=>go(screenHome);
+  document.getElementById('again').onclick=()=>go(meta.backTo);
+  document.getElementById('rec').onclick=()=>go(()=>screenRecords(meta.typeId));
+  if(isPB)toast('🎉 신기록 달성!');
+}
+
+/* ================= 기록실 ================= */
+function screenRecords(focusId){
+  const d=db();
+  const ids=Object.keys(d.records).filter(k=>d.records[k].length);
+  const label=k=>k.startsWith('complex_')?('복합훈련·'+({all:'전체',calc:'계산',cmp:'비교'}[k.split('_')[1]]||'')):(TYPE(k)?.name||k);
+  if(!ids.length){
+    app().innerHTML=`<button class="back" id="bk">‹ 홈</button><h1>기록실</h1><div class="muted" style="margin-top:40px">아직 기록이 없어요.<br>스킬 드릴을 한 번 풀어보세요!</div>`;
+    document.getElementById('bk').onclick=()=>go(screenHome);return;
+  }
+  const sel=focusId&&d.records[focusId]?focusId:ids[0];
+  const h=d.records[sel];
+  const per=h.map(r=>r.sec/r.total);
+  const best=Math.min(...per), avg=per.reduce((a,b)=>a+b,0)/per.length;
+  const gd={S:0,A:0,B:0,C:0,D:0};h.forEach(r=>gd[r.grade]++);
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 홈</button>
+    <h1>기록실</h1>
+    <div style="overflow-x:auto;white-space:nowrap;margin-bottom:8px">${ids.map(k=>`<span class="chip ${k===sel?'on':''}" data-id="${k}">${label(k)}</span>`).join('')}</div>
+    <div class="grid3">
+      <div class="stat"><div class="n">${best.toFixed(1)}<span style="font-size:12px">초</span></div><div class="l">최고 (문제당)</div></div>
+      <div class="stat"><div class="n">${avg.toFixed(1)}<span style="font-size:12px">초</span></div><div class="l">평균</div></div>
+      <div class="stat"><div class="n">${h.length}</div><div class="l">세션 수</div></div>
+    </div>
+    <div class="sec-title">성장 그래프 (문제당 초 · 최근 ${Math.min(h.length,20)})</div>
+    <div class="card">${chart(per.slice(-20))}</div>
+    <div class="sec-title">등급 분포</div>
+    <div class="card">${['S','A','B','C','D'].map(g=>{const w=Math.round(gd[g]/h.length*100);return `
+      <div style="display:flex;align-items:center;gap:10px;margin:6px 0"><span class="g${g}" style="font-weight:800;width:20px">${g}</span>
+      <div style="flex:1;background:var(--card2);border-radius:6px;height:16px;overflow:hidden"><div style="width:${w}%;height:100%;background:var(--yellow)"></div></div>
+      <span style="width:36px;text-align:right;color:var(--sub);font-size:13px">${gd[g]}</span></div>`;}).join('')}</div>
+    <div class="sec-title">데이터</div>
+    <div class="row"><button class="btn center" id="exp">기록 내보내기 💾</button><button class="btn center" id="imp">불러오기 📂</button></div>
+    <button class="btn center" id="clr" style="margin-top:10px;color:var(--red)">이 유형 기록 삭제</button>
+  `;
+  document.getElementById('bk').onclick=()=>go(screenHome);
+  app().querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(()=>screenRecords(c.dataset.id)));
+  document.getElementById('exp').onclick=exportData;
+  document.getElementById('imp').onclick=importData;
+  document.getElementById('clr').onclick=()=>{if(confirm(label(sel)+' 기록을 삭제할까요?')){const dd=db();delete dd.records[sel];save(dd);go(()=>screenRecords());}};
+}
+function chart(vals){
+  if(vals.length<2)return `<div class="muted">데이터가 2개 이상 쌓이면 그래프가 표시됩니다.</div>`;
+  const w=460,h=110,pad=8;const mn=Math.min(...vals),mx=Math.max(...vals);const rng=(mx-mn)||1;
+  const x=i=>pad+i*(w-2*pad)/(vals.length-1);
+  const y=v=>pad+(v-mn)/rng*(h-2*pad);
+  const pts=vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <polyline points="${pts}" fill="none" stroke="#FFD400" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${vals.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="#FFD400"/>`).join('')}
+  </svg><div class="muted" style="padding:0;margin-top:4px">아래로 내려갈수록 빨라진 것 (최고 ${mn.toFixed(1)}초 · 최저 ${mx.toFixed(1)}초)</div>`;
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(load())],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='암산연습_백업.json';a.click();toast('백업 파일을 저장했어요');
+}
+function importData(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+    rd.onload=()=>{try{const data=JSON.parse(rd.result);save(data);toast('기록을 불러왔어요');go(()=>screenRecords());}catch(err){alert('파일을 읽을 수 없어요')}};
+    rd.readAsText(f);};
+  inp.click();
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
+
+/* ================= 시작 ================= */
+screenHome();
+</script>
+</body>
+</html>
