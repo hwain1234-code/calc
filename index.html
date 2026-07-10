@@ -67,6 +67,10 @@
   .frac .d{padding:0 6px;border-top:3px solid var(--txt)}
   .qmark{color:var(--yellow);font-size:30px}
   .mul{font-variant-numeric:tabular-nums}
+  /* 세로셈 (여러수·네자리) */
+  .vcol{display:inline-flex;flex-direction:column;border-bottom:3px solid var(--txt);padding:0 14px 8px;min-width:150px;margin-bottom:8px}
+  .vrow{display:flex;justify-content:flex-end;gap:18px;font-size:clamp(26px,8.5vw,38px);font-weight:800;font-variant-numeric:tabular-nums;line-height:1.28}
+  .vop{margin-right:auto}
   /* keypad */
   .keys{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
   .key,.cmpbtn,.btn,.seg button,.cmpbtn{touch-action:manipulation;-webkit-user-select:none;user-select:none}
@@ -111,9 +115,9 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 function fAdd2(){const a=R(10,99),b=R(10,99);return calc(`${a} + ${b}`,a+b);}
 function fSub2(){let a=R(10,99),b=R(10,99);if(b>a)[a,b]=[b,a];return calc(`${a} − ${b}`,a-b);}
 function fAddSub2(){return Math.random()<.5?fAdd2():fSub2();}
-function fAdd4(){const a=R(1000,9999),b=R(1000,9999);return calc(`${a} + ${b}`,a+b);}
-function fSub4(){let a=R(1000,9999),b=R(1000,9999);if(b>a)[a,b]=[b,a];return calc(`${a} − ${b}`,a-b);}
-function fMultiAdd(){const n=[R(10,99),R(10,99),R(10,99),R(10,99),R(10,99)];return calc(n.join(' + '),n.reduce((x,y)=>x+y,0));}
+function fAdd4(){const a=R(1000,9999),b=R(1000,9999);return calcV([a,b],'+',a+b);}
+function fSub4(){let a=R(1000,9999),b=R(1000,9999);if(b>a)[a,b]=[b,a];return calcV([a,b],'−',a-b);}
+function fMultiAdd(){const n=[R(10,99),R(10,99),R(10,99),R(10,99),R(10,99)];return calcV(n,'+',n.reduce((x,y)=>x+y,0));}
 function fMul2x1(){const a=R(11,99),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
 function fMul3x1(){const a=R(100,999),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
 function fMul4x1(){const a=R(1000,9999),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
@@ -125,6 +129,7 @@ function fMul11(){if(Math.random()<.5){const a=R(11,99),b=11;return calc(`${a} �
 function fMul2x2(){const a=R(11,99),b=R(11,99);return calc(`${a} × ${b}`,a*b);}
 
 function calc(text,answer){return {mode:'number',text,answer};}
+function calcV(ops,op,answer){return {mode:'number',text:ops.join(' '+op+' '),answer,vstack:{ops,op}};} // 세로셈 표시
 
 // 분수비교: 두 분수를 가깝게 생성 → 실전형 대소판단
 function fFracCmp(){
@@ -323,7 +328,8 @@ function renderSession(){
   const pct=Math.round(s.i/t*100);
   let qhtml,input;
   if(p.mode==='number'){
-    qhtml=`<div class="qtag">${p._type}</div><div class="qtext">${p.text} =</div><div class="ans" id="ans"><span class="ph">?</span></div>`;
+    const qbody=p.vstack?vstack(p.vstack.ops,p.vstack.op):`<div class="qtext">${p.text} =</div>`;
+    qhtml=`<div class="qtag">${p._type}</div>${qbody}<div class="ans" id="ans"><span class="ph">?</span></div>`;
     input=`<div class="keys">
       ${[7,8,9,4,5,6,1,2,3].map(k=>`<button class="key" data-k="${k}">${k}</button>`).join('')}
       <button class="key clr" data-k="clear">C</button>
@@ -354,6 +360,7 @@ function renderSession(){
   }
 }
 function frac(n,d){return `<span class="frac"><span class="n">${n}</span><span class="d">${d}</span></span>`;}
+function vstack(ops,op){return `<div class="vcol">${ops.map((n,i)=>`<div class="vrow">${i===ops.length-1?`<span class="vop">${op}</span>`:''}<span>${n}</span></div>`).join('')}</div>`;}
 function keyPress(k){
   if(k==='del')S.typed=S.typed.slice(0,-1);   // ⌫ 한 글자 지움
   else if(k==='clear')S.typed='';             // C 전체 지움
