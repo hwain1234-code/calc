@@ -45,7 +45,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
   .stat{background:var(--card);border-radius:14px;padding:14px;text-align:center}
-  .stat .n{font-size:24px;font-weight:800}
+  .stat .n{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
   .stat .l{font-size:11px;color:var(--sub);margin-top:2px}
   .back{background:none;border:none;color:var(--yellow);font-size:16px;font-weight:600;padding:14px 0;cursor:pointer;font-family:inherit}
   .chip{display:inline-block;background:var(--card2);border-radius:20px;padding:6px 12px;font-size:13px;margin:0 6px 6px 0;font-weight:600}
@@ -56,28 +56,18 @@
   .pbar{height:6px;background:var(--card2);border-radius:3px;overflow:hidden;margin-bottom:26px}
   .pbar>div{height:100%;background:var(--yellow);width:0;transition:width .2s}
   .qbox{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:14px}
-  .qtext{font-size:40px;font-weight:800;letter-spacing:.5px;font-variant-numeric:tabular-nums;text-align:center}
   .qtag{color:var(--sub);font-size:13px;font-weight:700;margin-bottom:14px}
-  .ans{font-size:34px;font-weight:800;min-height:46px;color:var(--yellow);font-variant-numeric:tabular-nums;letter-spacing:1px}
-  .ans .ph{color:var(--line)}
   /* fraction */
   .cmp{display:flex;align-items:center;justify-content:center;gap:18px;font-size:34px;font-weight:800}
   .frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05}
   .frac .n{padding:0 6px}
   .frac .d{padding:0 6px;border-top:3px solid var(--txt)}
   .qmark{color:var(--yellow);font-size:30px}
-  .mul{font-variant-numeric:tabular-nums}
-  /* 세로셈 (여러수·네자리) */
-  .vcol{display:inline-flex;flex-direction:column;border-bottom:3px solid var(--txt);padding:0 14px 8px;min-width:150px;margin-bottom:8px}
-  .vrow{display:flex;justify-content:flex-end;gap:18px;font-size:clamp(26px,8.5vw,38px);font-weight:800;font-variant-numeric:tabular-nums;line-height:1.28}
-  .vop{margin-right:auto}
-  /* keypad */
-  .keys{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .key,.cmpbtn,.btn,.seg button,.cmpbtn{touch-action:manipulation;-webkit-user-select:none;user-select:none}
-  .key{background:var(--card2);border:none;border-radius:14px;padding:20px 0;font-size:26px;font-weight:700;color:var(--txt);font-family:inherit;cursor:pointer}
-  .key:active{background:#3a3a40}
-  .key.wide{grid-column:span 1}
-  .key.clr{color:var(--red);font-weight:800}
+  .mul{font-variant-numeric:tabular-nums;letter-spacing:1px}
+  /* 소수점 강조: 크고 노란 점 + 앞뒤 여백 */
+  .dot{color:var(--yellow);font-size:1.15em;font-weight:900;margin:0 1px;position:relative;top:-.05em}
+  .wrong .dot,.adv .dot{font-size:1.1em;margin:0}
+  .cmpbtn,.btn,.seg button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
   .cmpbtns{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
   .cmpbtn{background:var(--card2);border:none;border-radius:16px;padding:30px 0;font-size:40px;font-weight:800;color:var(--txt);font-family:inherit;cursor:pointer}
   .cmpbtn:active{background:var(--yellow);color:#111}
@@ -94,6 +84,20 @@
   .wrong .yr{color:var(--red);font-weight:600}
   .wrong .cr{color:var(--green);font-weight:700}
   .muted{color:var(--sub);font-size:13px;text-align:center;padding:8px}
+  /* 분수비교 풀이 안내 */
+  .adv{flex-basis:100%;font-size:13px;line-height:1.55;color:var(--sub);border-top:1px solid var(--line);padding-top:8px;margin-top:4px;font-variant-numeric:tabular-nums}
+  .adv .gap{margin-bottom:6px}
+  .adv .m{margin:4px 0;padding-left:8px;border-left:2px solid var(--line)}
+  .adv .m.best{color:var(--txt);border-left-color:var(--yellow)}
+  .adv .m b{font-weight:700}
+  .adv .m.best b{color:var(--yellow)}
+  .adv .ez{font-size:12px}
+  .adv .tag{display:inline-block;background:var(--yellow);color:#111;font-size:11px;font-weight:800;padding:1px 6px;border-radius:6px;margin-right:4px;vertical-align:1px}
+  .bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+  .bar .lb{width:84px;font-weight:700;flex:none}
+  .bar .tr{flex:1;background:var(--card2);border-radius:6px;height:16px;overflow:hidden}
+  .bar .tr>div{height:100%;background:var(--red)}
+  .bar .nn{width:76px;text-align:right;color:var(--sub);flex:none}
   svg.chart{width:100%;height:120px;display:block}
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--yellow);color:#111;font-weight:700;padding:12px 20px;border-radius:24px;font-size:14px;opacity:0;transition:opacity .2s;z-index:50;pointer-events:none}
   .toast.show{opacity:1}
@@ -111,25 +115,6 @@
 // sec: [S,A,B,C] — 문제 1개당 목표시간(초). D는 C 초과. (교재 등급표 비례환산)
 const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-
-function fAdd2(){const a=R(10,99),b=R(10,99);return calc(`${a} + ${b}`,a+b);}
-function fSub2(){let a=R(10,99),b=R(10,99);if(b>a)[a,b]=[b,a];return calc(`${a} − ${b}`,a-b);}
-function fAddSub2(){return Math.random()<.5?fAdd2():fSub2();}
-function fAdd4(){const a=R(1000,9999),b=R(1000,9999);return calcV([a,b],'+',a+b);}
-function fSub4(){let a=R(1000,9999),b=R(1000,9999);if(b>a)[a,b]=[b,a];return calcV([a,b],'−',a-b);}
-function fMultiAdd(){const n=[R(10,99),R(10,99),R(10,99),R(10,99),R(10,99)];return calcV(n,'+',n.reduce((x,y)=>x+y,0));}
-function fMul2x1(){const a=R(11,99),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
-function fMul3x1(){const a=R(100,999),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
-function fMul4x1(){const a=R(1000,9999),b=R(2,9);return calc(`${a} × ${b}`,a*b);}
-function fMulX5(){const a=R(120,980)*2/2, b=pick([5,15,25]);const x=R(24,196)*(pick([5,10,15,20]));return calc(`${x} × ${b}`,x*b);}
-function fMul1019(){const a=R(11,29),b=R(11,29);return calc(`${a} × ${b}`,a*b);}
-function fMul11(){if(Math.random()<.5){const a=R(11,99),b=11;return calc(`${a} × 11`,a*11);}
-  // 십등일합: 십의자리 같고 일의자리 합=10  (예 27×23)
-  const t=R(1,9), o=R(1,9); const a=t*10+o, b=t*10+(10-o); return calc(`${a} × ${b}`,a*b);}
-function fMul2x2(){const a=R(11,99),b=R(11,99);return calc(`${a} × ${b}`,a*b);}
-
-function calc(text,answer){return {mode:'number',text,answer};}
-function calcV(ops,op,answer){return {mode:'number',text:ops.join(' '+op+' '),answer,vstack:{ops,op}};} // 세로셈 표시
 
 // 분수비교: 두 분수를 가깝게 생성 → 실전형 대소판단
 function fFracCmp(){
@@ -156,27 +141,18 @@ function fMulCmp(){
 }
 
 const TYPES=[
-  {id:'addsub2',part:1,name:'두 자리 덧셈·뺄셈',ex:'36 + 55 / 53 − 31',gen:fAddSub2,sec:[1.75,2,2.25,2.5],def:20},
-  {id:'add4',part:1,name:'네 자리 덧셈',ex:'3666 + 2768',gen:fAdd4,sec:[3.75,4.4,5,5.6],def:8},
-  {id:'sub4',part:1,name:'네 자리 뺄셈',ex:'7851 − 3399',gen:fSub4,sec:[5.6,6.25,6.9,7.5],def:8},
-  {id:'multiadd',part:1,name:'여러 수 덧셈',ex:'41+35+29+33+31',gen:fMultiAdd,sec:[7.5,8.3,9.2,10],def:6},
-  {id:'mul2x1',part:1,name:'두 자리 × 한 자리',ex:'98 × 6',gen:fMul2x1,sec:[1.75,2,2.25,2.5],def:20},
-  {id:'mul3x1',part:1,name:'세 자리 × 한 자리',ex:'381 × 7',gen:fMul3x1,sec:[9,10,11,12],def:10},
-  {id:'mul4x1',part:1,name:'네 자리 × 한 자리',ex:'4084 × 4',gen:fMul4x1,sec:[21,24,27,30],def:10},
-  {id:'mulx5',part:1,name:'×5·15·25 (단위깨기)',ex:'315 × 15',gen:fMulX5,sec:[4,4.5,5,5.5],def:12},
-  {id:'mul1019',part:1,name:'10·20단 곱셈',ex:'14 × 15',gen:fMul1019,sec:[2,2.25,2.5,2.75],def:20},
-  {id:'mul11',part:1,name:'11단·십등일합',ex:'26 × 11 / 27 × 23',gen:fMul11,sec:[2,2.25,2.5,2.75],def:20},
-  {id:'mul2x2',part:1,name:'두 자리 × 두 자리',ex:'94 × 35',gen:fMul2x2,sec:[10.5,12,13.5,15],def:20},
-  {id:'fraccmp',part:2,name:'분수 비교',ex:'33/46  □  41/46',gen:fFracCmp,sec:[7,10,12,15],def:12},
-  {id:'mulcmp',part:2,name:'곱셈 비교',ex:'7300×30.8 □ 8600×25.4',gen:fMulCmp,sec:[10,13,16,20],def:10},
+  {id:'fraccmp',name:'분수 비교',ex:'33/46  □  41/46',gen:fFracCmp,sec:[7,10,12,15],def:12},
+  {id:'mulcmp',name:'곱셈 비교',ex:'7300×30.8 □ 8600×25.4',gen:fMulCmp,sec:[10,13,16,20],def:10},
 ];
 const TYPE=id=>TYPES.find(t=>t.id===id);
+// 소수점을 눈에 띄게: 30.8 → 30<span class="dot">.</span>8
+const dec=x=>String(x).replace('.','<span class="dot">.</span>');
 
 /* ================= 저장소 ================= */
 const KEY='psatcalc_v1';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
 function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
-function db(){const d=load();d.records=d.records||{};d.streak=d.streak||{last:null,days:0};d.totalSolved=d.totalSolved||0;return d;}
+function db(){const d=load();d.records=d.records||{};d.streak=d.streak||{last:null,days:0};d.totalSolved=d.totalSolved||0;d.frac=d.frac||{bucket:{},method:{},wrong:[]};return d;}
 function today(){const t=new Date();return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();}
 function yesterday(){const t=new Date();t.setDate(t.getDate()-1);return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();}
 
@@ -225,8 +201,8 @@ function screenHome(){
       <div class="stat"><div class="n">${d.totalSolved||0}</div><div class="l">누적 문제</div></div>
     </div>
     <div class="sec-title">모드 선택</div>
-    <button class="btn primary big" id="m1"><div class="t">🎯 스킬 드릴</div><div class="d">한 유형만 집중 반복 (13가지 유형)</div></button>
-    <button class="btn big" id="m2"><div class="t">🔀 복합 훈련</div><div class="d">여러 유형 섞은 실전 세트 (WOD식)</div></button>
+    <button class="btn primary big" id="m1"><div class="t">🎯 스킬 드릴</div><div class="d">분수 비교 · 곱셈 비교 한 유형씩 집중 반복</div></button>
+    <button class="btn big" id="m2"><div class="t">🔀 복합 훈련</div><div class="d">분수·곱셈 비교를 섞은 실전 세트</div></button>
     <button class="btn big" id="m3"><div class="t">📈 기록실</div><div class="d">유형별 최고기록·성장그래프</div></button>
     <div class="hint">💡 사파리/크롬 메뉴 → "홈 화면에 추가"하면 앱처럼 실행됩니다. 기록은 이 폰에 저장돼요.</div>
   `;
@@ -236,14 +212,12 @@ function screenHome(){
 }
 
 function screenDrillMenu(){
-  const p1=TYPES.filter(t=>t.part===1), p2=TYPES.filter(t=>t.part===2);
   const card=t=>{const bp=bestPerProblem(t.id);
-    return `<button class="btn" data-id="${t.id}"><div class="t">${t.name}</div><div class="d">${t.ex}${bp?`　·　최고 ${bp.toFixed(1)}초/문제`:''}</div></button>`;};
+    return `<button class="btn big" data-id="${t.id}"><div class="t">${t.name}</div><div class="d">${dec(t.ex)}${bp?`　·　최고 ${dec(bp.toFixed(1))}초/문제`:''}</div></button>`;};
   app().innerHTML=`
     <button class="back" id="bk">‹ 홈</button>
     <h1>스킬 드릴</h1><div class="sub">한 유형을 반사적으로 나올 때까지</div>
-    <div class="sec-title">PART 01 · 사칙연산</div>${p1.map(card).join('')}
-    <div class="sec-title">PART 02 · 분수·곱셈 비교 (PSAT 핵심)</div>${p2.map(card).join('')}
+    <div class="sec-title">분수·곱셈 비교 (PSAT 핵심)</div>${TYPES.map(card).join('')}
   `;
   document.getElementById('bk').onclick=()=>go(screenHome);
   app().querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>go(()=>screenSetup(b.dataset.id)));
@@ -256,12 +230,13 @@ function screenSetup(typeId){
   const opts=[Math.max(5,Math.round(t.def/2)),t.def,t.def*2];
   app().innerHTML=`
     <button class="back" id="bk">‹ 유형선택</button>
-    <h1>${t.name}</h1><div class="sub">${t.ex}</div>
+    <h1>${t.name}</h1><div class="sub">${dec(t.ex)}</div>
     <div class="card">
       <div class="sec-title" style="margin-top:0">문제 수</div>
       <div class="seg" id="seg">${opts.map(o=>`<button data-c="${o}" class="${o===cur?'on':''}">${o}문제</button>`).join('')}</div>
       <div class="hint">목표시간: S ${(t.sec[0]*cur).toFixed(0)}초 · A ${(t.sec[1]*cur).toFixed(0)}초 · B ${(t.sec[2]*cur).toFixed(0)}초 · C ${(t.sec[3]*cur).toFixed(0)}초 (기준: 교재 등급표)</div>
     </div>
+    ${PENALTY[typeId]?`<div class="hint" style="margin:-6px 4px 12px">⏱ 이 유형은 틀린 문제 1개당 <b style="color:var(--red)">+${PENALTY[typeId]}초</b>가 기록 시간에 더해지고, 끝나면 틀린 문제만 다시 풀 수 있어요.</div>`:''}
     <button class="btn primary big center" id="start">시작 ▶</button>
   `;
   let count=cur;
@@ -272,46 +247,31 @@ function screenSetup(typeId){
     app().querySelector('.hint').innerHTML=`목표시간: S ${(t.sec[0]*count).toFixed(0)}초 · A ${(t.sec[1]*count).toFixed(0)}초 · B ${(t.sec[2]*count).toFixed(0)}초 · C ${(t.sec[3]*count).toFixed(0)}초 (기준: 교재 등급표)`;
   });
   document.getElementById('start').onclick=()=>{
-    const probs=[];for(let i=0;i<count;i++){const p=t.gen();p._sec=t.sec;p._type=t.name;probs.push(p);}
+    const probs=[];for(let i=0;i<count;i++){const p=t.gen();p._sec=t.sec;p._type=t.name;p._id=t.id;probs.push(p);}
     startSession(probs,{title:t.name,backTo:()=>screenSetup(typeId),typeId});
   };
 }
 
 function screenComplexMenu(){
-  S.cx=S.cx||{count:20,scope:'all'};
-  const scopes=[
-    {k:'all',t:'전체 통합',d:'계산+비교 전부 (실전형)'},
-    {k:'calc',t:'계산만',d:'덧뺄·곱셈'},
-    {k:'cmp',t:'비교만',d:'분수·곱셈 비교 (PSAT 핵심)'},
-  ];
+  S.cx=S.cx||{count:20};
   app().innerHTML=`
     <button class="back" id="bk">‹ 홈</button>
-    <h1>복합 훈련</h1><div class="sub">여러 유형을 난이도순으로 섞은 한 세트</div>
-    <div class="card"><div class="sec-title" style="margin-top:0">구성</div>
-      ${scopes.map(s=>`<button class="btn" data-k="${s.k}" style="margin-bottom:8px"><div class="t">${s.t}</div><div class="d">${s.d}</div></button>`).join('')}
-    </div>
+    <h1>복합 훈련</h1><div class="sub">분수 비교와 곱셈 비교를 무작위로 섞은 한 세트</div>
     <div class="card"><div class="sec-title" style="margin-top:0">문제 수</div>
       <div class="seg" id="seg">${[10,20,30].map(o=>`<button data-c="${o}" class="${o===S.cx.count?'on':''}">${o}문제</button>`).join('')}</div>
+      <div class="hint">⏱ 분수 비교 문제는 틀릴 때마다 +${PENALTY.fraccmp}초가 더해지고, 끝나면 틀린 문제만 다시 풀 수 있어요.</div>
     </div>
+    <button class="btn primary big center" id="start">시작 ▶</button>
   `;
   document.getElementById('bk').onclick=()=>go(screenHome);
   app().querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{S.cx.count=+b.dataset.c;app().querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));});
-  app().querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>{
-    S.cx.scope=b.dataset.k; startComplex();
-  });
+  document.getElementById('start').onclick=startComplex;
 }
 function startComplex(){
-  const n=S.cx.count, scope=S.cx.scope;
-  let pool;
-  if(scope==='calc')pool=TYPES.filter(t=>t.part===1);
-  else if(scope==='cmp')pool=TYPES.filter(t=>t.part===2);
-  else pool=TYPES.slice();
-  // 난이도순 정렬용 가중치(sec 합)
-  const order=t=>t.sec[0];
+  const n=S.cx.count;
   const probs=[];
-  for(let i=0;i<n;i++){const t=pick(pool);const p=t.gen();p._sec=t.sec;p._type=t.name;p._ord=order(t);probs.push(p);}
-  probs.sort((a,b)=>a._ord-b._ord); // 쉬움→어려움
-  startSession(probs,{title:'복합 훈련',backTo:screenComplexMenu,typeId:'complex_'+scope});
+  for(let i=0;i<n;i++){const t=pick(TYPES);const p=t.gen();p._sec=t.sec;p._type=t.name;p._id=t.id;probs.push(p);}
+  startSession(probs,{title:'복합 훈련',backTo:screenComplexMenu,typeId:'complex_cmp'});
 }
 
 /* ================= 세션 진행 ================= */
@@ -326,67 +286,36 @@ function renderSession(){
   const s=S.sess, p=s.problems[s.i], t=s.problems.length;
   s._lock=false; // 새 문제 → 제출 잠금 해제
   const pct=Math.round(s.i/t*100);
-  let qhtml,input;
-  if(p.mode==='number'){
-    const qbody=p.vstack?vstack(p.vstack.ops,p.vstack.op):`<div class="qtext">${p.text} =</div>`;
-    qhtml=`<div class="qtag">${p._type}</div>${qbody}<div class="ans" id="ans"><span class="ph">?</span></div>`;
-    input=`<div class="keys">
-      ${[7,8,9,4,5,6,1,2,3].map(k=>`<button class="key" data-k="${k}">${k}</button>`).join('')}
-      <button class="key clr" data-k="clear">C</button>
-      <button class="key" data-k="0">0</button>
-      <button class="key del" data-k="del">⌫</button>
-    </div>`;
-  }else{
-    qhtml=`<div class="qtag">${p._type}</div>`+ (p.kind==='frac'
+  const qhtml=`<div class="qtag">${p._type}</div>`+ (p.kind==='frac'
       ? `<div class="cmp">${frac(p.left.n,p.left.d)}<span class="qmark">?</span>${frac(p.right.n,p.right.d)}</div>`
-      : `<div class="cmp"><span class="mul">${p.left.a} × ${p.left.b}</span><span class="qmark">?</span><span class="mul">${p.right.c} × ${p.right.d}</span></div>`);
-    input=`<div class="cmpbtns"><button class="cmpbtn" data-c="&lt;">&lt;</button><button class="cmpbtn" data-c="&gt;">&gt;</button></div>`;
-  }
+      : `<div class="cmp"><span class="mul">${dec(p.left.a)} × ${dec(p.left.b)}</span><span class="qmark">?</span><span class="mul">${dec(p.right.c)} × ${dec(p.right.d)}</span></div>`);
   app().innerHTML=`
     <div class="prog"><span>${s.i+1} / ${t}</span><span class="timer" id="timer">00:00</span>
       <span><button class="back" id="quit" style="padding:0;font-size:14px">종료</button></span></div>
     <div class="pbar"><div style="width:${pct}%"></div></div>
     <div class="qbox" id="qbox">${qhtml}</div>
-    ${input}
+    <div class="cmpbtns"><button class="cmpbtn" data-c="&lt;">&lt;</button><button class="cmpbtn" data-c="&gt;">&gt;</button></div>
   `;
   document.getElementById('quit').onclick=()=>finishSession(true);
-  if(p.mode==='number'){
-    S.typed='';
-    app().querySelectorAll('.key').forEach(b=>b.onpointerdown=ev=>{ev.preventDefault();keyPress(b.dataset.k);});
-    document.onkeydown=e=>{if(e.key>='0'&&e.key<='9')keyPress(e.key);else if(e.key==='Backspace')keyPress('del');else if(e.key==='Escape'||e.key==='Delete'||e.key.toLowerCase()==='c')keyPress('clear');};
-  }else{
-    document.onkeydown=null;
-    app().querySelectorAll('.cmpbtn').forEach(b=>b.onpointerdown=ev=>{ev.preventDefault();submit(b.dataset.c);});
-  }
+  app().querySelectorAll('.cmpbtn').forEach(b=>b.onpointerdown=ev=>{ev.preventDefault();submit(b.dataset.c);});
+  // 키보드: ← 또는 , = "<",  → 또는 . = ">"
+  document.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key===','||e.key==='<')submit('<');else if(e.key==='ArrowRight'||e.key==='.'||e.key==='>')submit('>');};
 }
 function frac(n,d){return `<span class="frac"><span class="n">${n}</span><span class="d">${d}</span></span>`;}
-function vstack(ops,op){return `<div class="vcol">${ops.map((n,i)=>`<div class="vrow">${i===ops.length-1?`<span class="vop">${op}</span>`:''}<span>${n}</span></div>`).join('')}</div>`;}
-function keyPress(k){
-  if(k==='del')S.typed=S.typed.slice(0,-1);   // ⌫ 한 글자 지움
-  else if(k==='clear')S.typed='';             // C 전체 지움
-  else{if(S.typed.length<7)S.typed+=k;}
-  const a=document.getElementById('ans');
-  if(a)a.innerHTML=S.typed===''?'<span class="ph">?</span>':S.typed;
-  // 정답을 입력하면 자동으로 다음 문제로 (정답일 때만)
-  if(k!=='del' && k!=='clear' && S.typed!==''){
-    const p=S.sess.problems[S.sess.i];
-    if(parseInt(S.typed,10)===p.answer) submit(p.answer);
-  }
-}
 function submit(val){
   const s=S.sess; if(!s||s._lock)return; s._lock=true; // 중복 제출 방지
   const p=s.problems[s.i];
-  const ok = (p.mode==='number')? (val===p.answer) : (val===p.answer);
+  const ok = val===p.answer;
   if(ok)s.correct++;
-  else s.wrong.push({q:p.mode==='number'?p.text+' =':cmpText(p), your:p.mode==='number'?val:val, correct:p.answer});
+  else s.wrong.push({q:cmpText(p), your:val, correct:p.answer, p}); // p: 재도전용 원본 문제
+  if(p._id==='fraccmp'&&!s.meta.retry)recordFrac(p,ok,val); // 분수비교 통계 (재도전 제외)
   const box=document.getElementById('qbox');
   box.className='qbox '+(ok?'flash-ok':'flash-no');
   // 짧은 피드백 후 다음
   const delay=ok?150:650;
   if(!ok){ // 오답이면 정답 잠깐 표시
-    const tag=box.querySelector('.qtag');
     const info=document.createElement('div');info.style.cssText='color:var(--red);font-weight:700;margin-top:10px;font-size:15px';
-    info.textContent='정답: '+(p.mode==='number'?p.answer:p.answer);
+    info.textContent='정답: '+p.answer;
     box.appendChild(info);
   }
   setTimeout(()=>{
@@ -395,52 +324,148 @@ function submit(val){
     else renderSession();
   },delay);
 }
-function cmpText(p){return p.kind==='frac'?`${p.left.n}/${p.left.d} ? ${p.right.n}/${p.right.d}`:`${p.left.a}×${p.left.b} ? ${p.right.c}×${p.right.d}`;}
+function cmpText(p){return p.kind==='frac'?`${p.left.n}/${p.left.d} ? ${p.right.n}/${p.right.d}`:`${dec(p.left.a)}×${dec(p.left.b)} ? ${dec(p.right.c)}×${dec(p.right.d)}`;}
+
+/* ================= 분수비교 풀이법 분석 ================= */
+// 각 풀이법의 "쉬움 점수(ease)": 그 방법으로 비교했을 때 두 값이 몇 % 벌어져 보이는지.
+// 많이 벌어질수록 어림으로 판단하기 쉬움 → 가장 큰 쪽을 추천.
+const FM={
+  dir:{k:'dir',name:'방향 즉시판단',short:'방향'},
+  lr:{k:'lr',name:'좌우 증감률 비교',short:'좌우'},
+  diff:{k:'diff',name:'차이 분수 (아바타)',short:'아바타'},
+  ud:{k:'ud',name:'상하 비교 (값 어림)',short:'상하'},
+  one:{k:'one',name:'1에서 빠지는 양 비교',short:'1−x'},
+};
+const BUCKETS=['<1%','1~3%','3~5%','5~10%','10%+'];
+function P(x){const v=x*100;const s=Math.abs(v)>=100?v.toFixed(0):v.toFixed(1);return dec(s.replace(/\.0$/,''))+'%';}
+const sgn=r=>(r>=0?'+':'−')+P(Math.abs(r));
+function fracGap(a,b,c,d){const v1=a/b,v2=c/d;return Math.abs(v1-v2)/Math.min(v1,v2)*100;}
+function gapBucket(g){return g<1?'<1%':g<3?'1~3%':g<5?'3~5%':g<10?'5~10%':'10%+';}
+function fracMethods(p){
+  const a=p.left.n,b=p.left.d,c=p.right.n,d=p.right.d;
+  const v1=a/b,v2=c/d, rightBig=v2>v1, win=rightBig?'오른쪽':'왼쪽';
+  const gap=fracGap(a,b,c,d);
+  const out=[];
+  if((c>=a&&d<=b)||(c<=a&&d>=b)){
+    const ar=(x,y)=>x===y?'같음':x<y?'↑':'↓';
+    out.push({...FM.dir,ease:999,text:`분자 ${a}→${c} (${ar(a,c)}) · 분모 ${b}→${d} (${ar(b,d)}) → 계산 없이 <b>${win}</b>이 큼`});
+  }else{
+    // 좌우: 분자 변화율 vs 분모 변화율
+    const rN=(c-a)/a, rD=(d-b)/b; let e=Math.abs(rN-rD)*100;
+    if(Math.max(Math.abs(rN),Math.abs(rD))>1)e*=0.5; // 100% 넘는 변화율은 어림이 어려움
+    out.push({...FM.lr,ease:e,text:`분자 ${a}→${c} (${sgn(rN)}) · 분모 ${b}→${d} (${sgn(rD)}) → ${rN>rD?(rN>=0?'분자가 더 많이 늘어':'분자가 덜 줄어'):(rD>=0?'분모가 더 많이 늘어':'분모가 덜 줄어')} <b>${win}</b>이 큼`});
+    // 아바타: 분자 큰 쪽에서 작은 쪽을 빼서 차이분수 vs 작은 쪽 분수
+    const [p1,q1,p2,q2]=c>a?[c,d,a,b]:[a,b,c,d]; // p1>p2, q1>q2
+    const df=(p1-p2)/(q1-q2), base=p2/q2, rel=Math.abs(df/base-1)*100;
+    const small=(p1-p2)<100&&(q1-q2)<100;
+    out.push({...FM.diff,ease:rel*(small?1:0.6),text:`차이 분수 ${p1-p2}/${q1-q2} ≈ ${P(df)} vs ${p2}/${q2} ≈ ${P(base)} → 차이분수가 ${df>base?'더 커서 분자 큰 쪽':'더 작아서 분자 작은 쪽'}인 <b>${win}</b>이 큼`});
+  }
+  // 상하: 각 분수 값을 어림
+  const BM=[[.25,'1/4'],[1/3,'1/3'],[.5,'1/2'],[2/3,'2/3'],[.75,'3/4'],[1,'1'],[1.5,'1.5'],[2,'2']];
+  const bm=BM.find(x=>(v1-x[0])*(v2-x[0])<0);
+  out.push({...FM.ud,ease:gap*(bm?1.8:1),text:`${a}/${b} ≈ ${P(v1)} · ${c}/${d} ≈ ${P(v2)}${bm?` (기준 ${bm[1]}을 사이에 두고 갈림)`:''} → <b>${win}</b>이 큼`});
+  // 1−x 또는 x−1
+  if(v1<1&&v2<1){
+    const m1=(b-a)/b,m2=(d-c)/d, rel=Math.abs(m1-m2)/Math.min(m1,m2)*100;
+    out.push({...FM.one,ease:rel*(Math.min(v1,v2)<.6?.5:1),text:`1에서 빠지는 양: 왼쪽 ${b-a}/${b} ≈ ${P(m1)} · 오른쪽 ${d-c}/${d} ≈ ${P(m2)} → 덜 빠지는 <b>${win}</b>이 큼`});
+  }else if(v1>1&&v2>1){
+    const m1=v1-1,m2=v2-1, rel=Math.abs(m1-m2)/Math.min(m1,m2)*100;
+    out.push({...FM.one,name:'분모→분자 증가율 비교',ease:rel*(Math.max(v1,v2)>2?.5:1),text:`분모→분자 증가율: 왼쪽 ${b}→${a} (${sgn(m1)}) · 오른쪽 ${d}→${c} (${sgn(m2)}) → 더 많이 늘어난 <b>${win}</b>이 큼`});
+  }
+  out.sort((x,y)=>y.ease-x.ease);
+  return {methods:out,best:out[0],gap,bucket:gapBucket(gap),win};
+}
+function adviceHTML(p){
+  const an=fracMethods(p);
+  const stars=e=>e>=999?'계산 불필요':e>=15?'쉬움':e>=5?'보통':'어려움';
+  return `<div class="adv">
+    <div class="gap">두 값 차이 <b>${dec(an.gap.toFixed(1))}%</b> (${an.bucket})</div>
+    ${an.methods.map((m,i)=>`<div class="m ${i===0?'best':''}">${i===0?'<span class="tag">추천</span>':''}<b>${m.name}</b> <span class="ez">· ${stars(m.ease)}</span><br>${m.text}</div>`).join('')}
+    ${an.best.ease<5?`<div class="m" style="border-left-color:var(--red)"><b>⚠ 어림으로는 어려운 문제</b><br>이 정도 차이는 모든 방법이 애매해요. 시간을 쓰더라도 통분·곱셈 비교(${p.left.n}×${p.right.d} vs ${p.right.n}×${p.left.d})로 확인하는 게 안전합니다.</div>`:''}
+  </div>`;
+}
+// 통계 누적: 차이 구간별 · 추천 풀이법별 시도/오답 수, 최근 오답 목록
+function recordFrac(p,ok,val){
+  const d=db(); const f=d.frac;
+  const an=fracMethods(p);
+  const bump=(o,k)=>{o[k]=o[k]||{n:0,w:0};o[k].n++;if(!ok)o[k].w++;};
+  bump(f.bucket,an.bucket); bump(f.method,an.best.k);
+  if(!ok){f.wrong.push({a:p.left.n,b:p.left.d,c:p.right.n,d:p.right.d,your:val,ts:Date.now()});if(f.wrong.length>100)f.wrong=f.wrong.slice(-100);}
+  save(d);
+}
+
+/* 오답 패널티: 유형별로 틀린 문제 1개당 더해지는 초. 일단 분수비교만. */
+const PENALTY={fraccmp:15};
+const penaltyFor=p=>PENALTY[p._id]||0;
 
 function finishSession(early){
   const s=S.sess;clearInterval(s.timer);document.onkeydown=null;
   const answered=s.i; // 실제로 푼 문제 수
   if(early && answered===0){ go(s.meta.backTo); return; } // 하나도 안 풀고 종료 → 그냥 나감
-  const elapsed=(Date.now()-s.start)/1000;
+  const raw=(Date.now()-s.start)/1000;
+  const penalty=s.wrong.reduce((sum,w)=>sum+penaltyFor(w.p),0); // 틀린 문제 패널티 합
+  const elapsed=raw+penalty; // 패널티 포함 시간으로 채점·기록
   const subset=s.problems.slice(0,answered); // 푼 문제만 채점 기준
   const g=gradeOf(subset,elapsed);
   const total=answered;
-  const rec={date:today(),ts:Date.now(),sec:Math.round(elapsed*10)/10,total,correct:s.correct,grade:g,partial:!!early};
+  const rec={date:today(),ts:Date.now(),sec:Math.round(elapsed*10)/10,rawSec:Math.round(raw*10)/10,penalty,total,correct:s.correct,grade:g,partial:!!early};
   const tid=s.meta.typeId;
   const prevBest=bestPerProblem(tid);
   let isPB=false;
-  if(!early){ // 전체 완주만 정식 기록·최고기록으로 저장
+  if(!early && !s.meta.retry){ // 전체 완주(재도전 제외)만 정식 기록·최고기록으로 저장
     saveSession(tid,rec);
     const nowPer=elapsed/total;
     isPB=(s.correct===total)&&(prevBest===null||nowPer<prevBest);
   }
   screenResult(rec,g,isPB,prevBest,s.wrong,s.meta,early);
 }
+// 틀린 문제만 모아 다시 풀기 (기록엔 저장하지 않음)
+function startRetry(wrong,meta){
+  const probs=wrong.map(w=>w.p);
+  startSession(probs,{title:'틀린 문제 다시 풀기',backTo:meta.backTo,typeId:meta.typeId,retry:true,round:(meta.round||0)+1});
+}
 
 function screenResult(rec,g,isPB,prevBest,wrong,meta,early){
   const acc=Math.round(rec.correct/rec.total*100);
-  const per=(rec.sec/rec.total).toFixed(1);
+  const per=dec((rec.sec/rec.total).toFixed(1));
+  const hasFrac=S.sess&&S.sess.problems.some(p=>p._id==='fraccmp');
   app().innerHTML=`
     <button class="back" id="bk">‹ 홈</button>
     <h1>${meta.title}</h1>
     ${early?`<div style="text-align:center;margin:-4px 0 10px"><span class="chip" style="background:var(--card2)">⏸ 중단 · 푼 ${rec.total}문제만 채점 (기록엔 미저장)</span></div>`:''}
+    ${meta.retry?`<div style="text-align:center;margin:-4px 0 10px"><span class="chip" style="background:var(--card2)">🔁 틀린 문제 재도전 ${meta.round}회차 · 기록엔 미저장</span></div>`:''}
     <div class="grade g${g}">${g}</div>
-    ${isPB?`<div style="text-align:center;margin-bottom:12px"><span class="pb-tag">🎉 신기록! ${prevBest?prevBest.toFixed(1)+'→':''}${per}초/문제</span></div>`:''}
+    ${isPB?`<div style="text-align:center;margin-bottom:12px"><span class="pb-tag">🎉 신기록! ${prevBest?dec(prevBest.toFixed(1))+'→':''}${per}초/문제</span></div>`:''}
     <div class="grid3">
-      <div class="stat"><div class="n">${fmt(rec.sec*1000)}</div><div class="l">걸린 시간</div></div>
+      <div class="stat"><div class="n">${fmt(rec.sec*1000)}</div><div class="l">${rec.penalty?`걸린 시간 (실제 ${fmt(rec.rawSec*1000)})`:'걸린 시간'}</div></div>
       <div class="stat"><div class="n">${acc}%</div><div class="l">정답률 (${rec.correct}/${rec.total})</div></div>
       <div class="stat"><div class="n">${per}<span style="font-size:13px">초</span></div><div class="l">문제당</div></div>
     </div>
+    ${rec.penalty?`<div class="muted" style="color:var(--red);margin-top:8px">⏱ 오답 패널티 +${rec.penalty}초 (분수 비교 틀린 ${wrong.filter(w=>penaltyFor(w.p)).length}문제 × ${PENALTY.fraccmp}초)</div>`:''}
+    ${wrong.length?`
+    <div class="card" id="retrycard" style="margin-top:12px;border:2px solid var(--yellow)">
+      <div style="font-weight:700;font-size:16px;margin-bottom:10px">틀린 문제 ${wrong.length}개만 다시 풀어볼까요?</div>
+      <div class="row" style="margin-bottom:0">
+        <button class="btn primary center" id="retry">네, 틀린 것만 🔁</button>
+        <button class="btn center" id="noretry">아니요</button>
+      </div>
+    </div>`:''}
     ${wrong.length?`<div class="sec-title">틀린 문제 (${wrong.length})</div>${wrong.map(w=>`
-      <div class="wrong"><span class="q">${w.q}</span><span><span class="yr">내 답 ${w.your}</span> → <span class="cr">${w.correct}</span></span></div>`).join('')}`:`<div class="muted" style="margin-top:16px">✅ 전부 정답!</div>`}
+      <div class="wrong"><span class="q">${w.q}</span><span><span class="yr">내 답 ${w.your}</span> → <span class="cr">${w.correct}</span></span>${w.p._id==='fraccmp'?adviceHTML(w.p):''}</div>`).join('')}`:`<div class="muted" style="margin-top:16px">✅ 전부 정답!${meta.retry?' 틀린 문제를 모두 잡았어요 🎉':''}</div>`}
     <div style="height:12px"></div>
-    <button class="btn primary big center" id="again">다시 풀기 🔄</button>
+    <button class="btn ${wrong.length?'':'primary '}big center" id="again">${meta.retry?'새 세트 풀기 🔄':'다시 풀기 🔄'}</button>
+    ${hasFrac?`<button class="btn big center" id="fa">분수 비교 오답 분석 🔍</button>`:''}
     <button class="btn big center" id="rec">이 유형 기록 보기 📈</button>
     <button class="btn center" id="home">홈으로</button>
   `;
   document.getElementById('bk').onclick=()=>go(screenHome);
   document.getElementById('home').onclick=()=>go(screenHome);
   document.getElementById('again').onclick=()=>go(meta.backTo);
+  if(hasFrac)document.getElementById('fa').onclick=()=>go(screenFracAnalysis);
+  if(wrong.length){
+    document.getElementById('retry').onclick=()=>go(()=>startRetry(wrong,meta));
+    document.getElementById('noretry').onclick=()=>{document.getElementById('retrycard').remove();};
+  }
   document.getElementById('rec').onclick=()=>go(()=>screenRecords(meta.typeId));
   if(isPB)toast('🎉 신기록 달성!');
 }
@@ -448,8 +473,8 @@ function screenResult(rec,g,isPB,prevBest,wrong,meta,early){
 /* ================= 기록실 ================= */
 function screenRecords(focusId){
   const d=db();
-  const ids=Object.keys(d.records).filter(k=>d.records[k].length);
-  const label=k=>k.startsWith('complex_')?('복합훈련·'+({all:'전체',calc:'계산',cmp:'비교'}[k.split('_')[1]]||'')):(TYPE(k)?.name||k);
+  const ids=Object.keys(d.records).filter(k=>d.records[k].length&&(TYPE(k)||k.startsWith('complex_'))); // 삭제된 유형 기록은 숨김
+  const label=k=>k.startsWith('complex_')?'복합 훈련':(TYPE(k)?.name||k);
   if(!ids.length){
     app().innerHTML=`<button class="back" id="bk">‹ 홈</button><h1>기록실</h1><div class="muted" style="margin-top:40px">아직 기록이 없어요.<br>스킬 드릴을 한 번 풀어보세요!</div>`;
     document.getElementById('bk').onclick=()=>go(screenHome);return;
@@ -464,8 +489,8 @@ function screenRecords(focusId){
     <h1>기록실</h1>
     <div style="overflow-x:auto;white-space:nowrap;margin-bottom:8px">${ids.map(k=>`<span class="chip ${k===sel?'on':''}" data-id="${k}">${label(k)}</span>`).join('')}</div>
     <div class="grid3">
-      <div class="stat"><div class="n">${best.toFixed(1)}<span style="font-size:12px">초</span></div><div class="l">최고 (문제당)</div></div>
-      <div class="stat"><div class="n">${avg.toFixed(1)}<span style="font-size:12px">초</span></div><div class="l">평균</div></div>
+      <div class="stat"><div class="n">${dec(best.toFixed(1))}<span style="font-size:12px">초</span></div><div class="l">최고 (문제당)</div></div>
+      <div class="stat"><div class="n">${dec(avg.toFixed(1))}<span style="font-size:12px">초</span></div><div class="l">평균</div></div>
       <div class="stat"><div class="n">${h.length}</div><div class="l">세션 수</div></div>
     </div>
     <div class="sec-title">성장 그래프 (문제당 초 · 최근 ${Math.min(h.length,20)})</div>
@@ -475,15 +500,69 @@ function screenRecords(focusId){
       <div style="display:flex;align-items:center;gap:10px;margin:6px 0"><span class="g${g}" style="font-weight:800;width:20px">${g}</span>
       <div style="flex:1;background:var(--card2);border-radius:6px;height:16px;overflow:hidden"><div style="width:${w}%;height:100%;background:var(--yellow)"></div></div>
       <span style="width:36px;text-align:right;color:var(--sub);font-size:13px">${gd[g]}</span></div>`;}).join('')}</div>
+    ${sel==='fraccmp'||sel.startsWith('complex_')?`<button class="btn big center" id="fa" style="margin-top:6px">분수 비교 오답 분석 🔍</button>`:''}
     <div class="sec-title">데이터</div>
     <div class="row"><button class="btn center" id="exp">기록 내보내기 💾</button><button class="btn center" id="imp">불러오기 📂</button></div>
     <button class="btn center" id="clr" style="margin-top:10px;color:var(--red)">이 유형 기록 삭제</button>
   `;
   document.getElementById('bk').onclick=()=>go(screenHome);
+  const fa=document.getElementById('fa'); if(fa)fa.onclick=()=>go(screenFracAnalysis);
   app().querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(()=>screenRecords(c.dataset.id)));
   document.getElementById('exp').onclick=exportData;
   document.getElementById('imp').onclick=importData;
   document.getElementById('clr').onclick=()=>{if(confirm(label(sel)+' 기록을 삭제할까요?')){const dd=db();delete dd.records[sel];save(dd);go(()=>screenRecords());}};
+}
+/* ================= 분수비교 오답 분석 화면 ================= */
+function screenFracAnalysis(){
+  const f=db().frac;
+  const tot=Object.values(f.bucket).reduce((s,x)=>s+x.n,0), totW=Object.values(f.bucket).reduce((s,x)=>s+x.w,0);
+  const back=`<button class="back" id="bk">‹ 뒤로</button><h1>분수 비교 분석</h1>`;
+  if(!tot){
+    app().innerHTML=back+`<div class="muted" style="margin-top:40px">아직 분수 비교 기록이 없어요.<br>스킬 드릴 → 분수 비교를 풀면 쌓입니다.</div>`;
+    document.getElementById('bk').onclick=()=>go(()=>screenRecords('fraccmp'));return;
+  }
+  const pct=(w,n)=>n?Math.round(w/n*100):0;
+  const bar=(lb,w,n)=>`<div class="bar"><span class="lb">${lb}</span><div class="tr"><div style="width:${pct(w,n)}%"></div></div><span class="nn">${w}/${n} · ${pct(w,n)}%</span></div>`;
+  const brows=BUCKETS.map(k=>({k,...(f.bucket[k]||{n:0,w:0})})).filter(r=>r.n);
+  const mrows=Object.keys(FM).map(k=>({k,name:FM[k].name,...(f.method[k]||{n:0,w:0})})).filter(r=>r.n);
+  // 인사이트: 시도 3회 이상인 구간/풀이법 중 오답률이 가장 높은 것
+  const avg=totW/tot; // 전체 오답률보다 높은 구간/풀이법만 약점으로 지적 (시도 3회 이상)
+  const worst=arr=>arr.filter(r=>r.n>=3&&r.w>0&&r.w/r.n>avg).sort((x,y)=>y.w/y.n-x.w/x.n)[0];
+  const wb=worst(brows), wm=worst(mrows);
+  const insights=[];
+  if(wb)insights.push(`두 값 차이가 <b>${wb.k}</b>인 문제를 가장 많이 틀려요 (${wb.n}문제 중 ${wb.w}개, ${pct(wb.w,wb.n)}%).`);
+  if(wm)insights.push(`<b>${wm.name}</b>이 가장 쉬운 문제에서 오답률이 높아요 (${pct(wm.w,wm.n)}%). 이 방법을 집중 연습해 보세요.`);
+  if(!insights.length)insights.push('데이터가 더 쌓이면 약점을 짚어드려요. (구간별 3문제 이상)');
+  const recent=f.wrong.slice(-15).reverse();
+  app().innerHTML=back+`
+    <div class="sub">차이 크기별·풀이법별로 어디서 틀리는지</div>
+    <div class="grid3">
+      <div class="stat"><div class="n">${tot}</div><div class="l">푼 문제</div></div>
+      <div class="stat"><div class="n">${totW}</div><div class="l">오답</div></div>
+      <div class="stat"><div class="n">${pct(totW,tot)}%</div><div class="l">오답률</div></div>
+    </div>
+    <div class="card" style="border:2px solid var(--yellow);line-height:1.6;font-size:14px">💡 ${insights.join('<br>')}</div>
+    <div class="sec-title">두 값 차이별 오답률</div>
+    <div class="card">${brows.map(r=>bar(r.k,r.w,r.n)).join('')}
+      <div class="hint">차이 = |왼쪽값 − 오른쪽값| ÷ 작은 값. 1% 미만은 실전에서도 계산이 필요한 구간이에요.</div></div>
+    <div class="sec-title">추천 풀이법별 오답률</div>
+    <div class="card">${mrows.map(r=>bar(FM[r.k].short,r.w,r.n)).join('')}
+      <div class="hint">각 문제마다 "가장 크게 벌어져 보이는" 풀이법을 추천법으로 분류했어요. 어떤 방법이 필요한 문제에서 자주 틀리는지 볼 수 있습니다.</div></div>
+    <div class="sec-title">풀이법 요약</div>
+    <div class="card" style="font-size:13px;line-height:1.6;color:var(--sub)">
+      <b style="color:var(--txt)">방향 즉시판단</b> 분자↑ 분모↓면 계산 없이 큼.<br>
+      <b style="color:var(--txt)">좌우 증감률</b> 분자 변화율 vs 분모 변화율. 분자가 더 많이 늘면 오른쪽이 큼.<br>
+      <b style="color:var(--txt)">차이 분수(아바타)</b> 큰 쪽에서 작은 쪽을 뺀 분수와 작은 쪽 분수를 비교. 분모가 비슷할 때 차이가 크게 보임.<br>
+      <b style="color:var(--txt)">상하 비교</b> 각 분수 값을 % 로 어림. 1/2·2/3·1 같은 기준을 사이에 두면 즉시 판단.<br>
+      <b style="color:var(--txt)">1에서 빠지는 양</b> 값이 1에 가까우면 (분모−분자)/분모 끼리 비교. 덜 빠지는 쪽이 큼. 1보다 크면 분모→분자 증가율로.
+    </div>
+    ${recent.length?`<div class="sec-title">최근 틀린 문제 (${recent.length}) · 추천 풀이</div>${recent.map(w=>{
+      const p={left:{n:w.a,d:w.b},right:{n:w.c,d:w.d}};const ans=(w.a*w.d>w.c*w.b)?'>':'<';
+      return `<div class="wrong"><span class="q">${w.a}/${w.b} ? ${w.c}/${w.d}</span><span><span class="yr">내 답 ${w.your}</span> → <span class="cr">${ans}</span></span>${adviceHTML(p)}</div>`;}).join('')}`:''}
+    <button class="btn center" id="clr" style="margin-top:10px;color:var(--red)">분석 데이터 초기화</button>
+  `;
+  document.getElementById('bk').onclick=()=>go(()=>screenRecords('fraccmp'));
+  document.getElementById('clr').onclick=()=>{if(confirm('분수 비교 분석 데이터를 모두 지울까요?')){const dd=db();dd.frac={bucket:{},method:{},wrong:[]};save(dd);go(screenFracAnalysis);}};
 }
 function chart(vals){
   if(vals.length<2)return `<div class="muted">데이터가 2개 이상 쌓이면 그래프가 표시됩니다.</div>`;
@@ -494,7 +573,7 @@ function chart(vals){
   return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
     <polyline points="${pts}" fill="none" stroke="#FFD400" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     ${vals.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="#FFD400"/>`).join('')}
-  </svg><div class="muted" style="padding:0;margin-top:4px">아래로 내려갈수록 빨라진 것 (최고 ${mn.toFixed(1)}초 · 최저 ${mx.toFixed(1)}초)</div>`;
+  </svg><div class="muted" style="padding:0;margin-top:4px">아래로 내려갈수록 빨라진 것 (최고 ${dec(mn.toFixed(1))}초 · 최저 ${dec(mx.toFixed(1))}초)</div>`;
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(load())],{type:'application/json'});
