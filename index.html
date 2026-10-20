@@ -11,8 +11,9 @@
 <link rel="manifest" href='data:application/json,{"name":"PSAT 암산연습","short_name":"암산연습","start_url":".","display":"standalone","background_color":"%23111111","theme_color":"%23111111","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect width=%22192%22 height=%22192%22 rx=%2236%22 fill=%22%23111%22/%3E%3Crect y=%2228%22 x=%2216%22 width=%22160%22 height=%2244%22 rx=%228%22 fill=%22%23FFD400%22/%3E%3Ctext x=%2296%22 y=%22150%22 font-size=%2280%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22%23fff%22 text-anchor=%22middle%22%3E123%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"}]}'>
 <style>
   :root{
-    --bg:#111; --card:#1c1c1e; --card2:#26262a; --line:#38383c;
-    --yellow:#FFD400; --txt:#fff; --sub:#9a9aa2; --green:#34c759; --red:#ff453a; --blue:#0a84ff;
+    --bg:#0f1014; --card:#1a1b21; --card2:#25262e; --line:#363742;
+    --yellow:#FFD400; --txt:#fff; --sub:#9a9aa6; --green:#34c759; --red:#ff453a; --blue:#60a5fa;
+    --purple:#a78bfa; --mint:#5eead4; --orange:#fb923c; --pink:#f472b6;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
   html,body{height:100%}
@@ -25,17 +26,23 @@
   h1{font-size:26px;font-weight:800;letter-spacing:-.5px;margin:18px 0 2px}
   h1 .hl{background:var(--yellow);color:#111;padding:0 8px;border-radius:6px}
   .sub{color:var(--sub);font-size:13px;margin-bottom:18px}
-  .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+  .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,.05)}
+  .ic{display:inline-flex;width:34px;height:34px;border-radius:10px;align-items:center;justify-content:center;font-size:18px;margin-right:10px;vertical-align:middle}
+  .ic.y{background:rgba(255,212,0,.16)} .ic.b{background:rgba(96,165,250,.18)} .ic.g{background:rgba(52,199,89,.18)} .ic.p{background:rgba(167,139,250,.2)}
+  .gcard{border-left:4px solid var(--purple)}
+  .gbar{height:4px;background:var(--card2);border-radius:2px;margin-top:10px;overflow:hidden}
+  .gbar>div{height:100%}
   .row{display:flex;gap:10px;margin-bottom:12px}
   .row>*{flex:1}
   .row .btn{margin-bottom:0}
   .btn{
-    background:var(--card2);color:var(--txt);border:none;border-radius:14px;
+    background:var(--card2);color:var(--txt);border:1px solid rgba(255,255,255,.05);border-radius:14px;
     padding:16px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;
     width:100%;transition:transform .05s; text-align:left; margin-bottom:12px;
   }
   .btn:active{transform:scale(.97)}
-  .btn.primary{background:var(--yellow);color:#111}
+  .btn.primary{background:var(--yellow);color:#111;border-color:transparent}
+  .btn.primary .ic{background:rgba(0,0,0,.12)}
   .btn.big{padding:22px 18px;font-size:18px}
   .btn .t{font-size:17px;font-weight:700}
   .btn .d{font-size:12px;color:var(--sub);margin-top:3px;font-weight:500}
@@ -44,7 +51,8 @@
   .sec-title{font-size:13px;color:var(--sub);font-weight:700;margin:18px 4px 8px;text-transform:uppercase;letter-spacing:.5px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-  .stat{background:var(--card);border-radius:14px;padding:14px;text-align:center}
+  .stat{background:var(--card);border-radius:14px;padding:14px;text-align:center;border:1px solid rgba(255,255,255,.05)}
+  .stat.y .n{color:var(--yellow)} .stat.b .n{color:var(--blue)} .stat.p .n{color:var(--purple)} .stat.m .n{color:var(--mint)}
   .stat .n{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
   .stat .l{font-size:11px;color:var(--sub);margin-top:2px}
   .back{background:none;border:none;color:var(--yellow);font-size:16px;font-weight:600;padding:14px 0;cursor:pointer;font-family:inherit}
@@ -106,7 +114,8 @@
   .seg button.on{background:var(--yellow);color:#111}
   .hint{color:var(--sub);font-size:12px;line-height:1.5;margin-top:6px}
   /* ===== 개념 학습 ===== */
-  .ccard{display:flex;align-items:center;gap:10px}
+  .ccard{display:flex;align-items:center;gap:10px;padding:14px;border-left:4px solid var(--purple);margin-bottom:10px}
+  .ccard .num{flex:none;width:22px;font-weight:800;font-size:15px;text-align:center}
   .ccard .body{flex:1;min-width:0}
   .ccard .done{flex:none;background:var(--card2);color:var(--sub);border:none;border-radius:20px;padding:8px 12px;font-weight:700;font-size:12px;font-family:inherit;cursor:pointer}
   .ccard .done.on{background:var(--green);color:#fff}
@@ -118,12 +127,13 @@
   .exp b{color:var(--yellow)}
   .exp .frac{font-size:13px;vertical-align:middle;margin:0 2px}
   .exp .frac .d{border-top-width:2px}
-  .exb{background:var(--card2);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13.5px;line-height:1.7}
+  .exb{background:rgba(255,212,0,.06);border-left:3px solid var(--yellow);border-radius:0 12px 12px 0;padding:10px 12px;margin:12px 0;font-size:13.5px;line-height:1.7}
   .exh{font-weight:800;color:var(--yellow);margin-bottom:4px;font-size:13px}
+  .exp u{text-decoration:none;border-bottom:2px solid var(--mint);color:var(--mint)}
   .sub2{color:var(--sub);font-size:12.5px}
   .ctab{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px;font-variant-numeric:tabular-nums}
   .ctab th,.ctab td{border:1px solid var(--line);padding:6px 4px;text-align:center}
-  .ctab th{background:var(--card2);font-weight:700}
+  .ctab th{background:rgba(167,139,250,.14);font-weight:700}
   .ctab th.rl{text-align:left;font-weight:600;white-space:nowrap}
   .ctab .frac{font-size:12px}
   .ctab input{width:100%;min-width:52px;background:#0d0d0f;color:var(--yellow);border:1px solid var(--line);border-radius:6px;padding:6px 2px;font-size:14px;font-weight:700;text-align:center;font-family:inherit;font-variant-numeric:tabular-nums}
@@ -241,16 +251,16 @@ function screenHome(){
     <h1><span class="hl">암산</span> 연습</h1>
     <div class="sub">PSAT 자료해석 · 오프라인 속도훈련</div>
     <div class="grid3">
-      <div class="stat"><div class="n">${d.streak.days||0}<span style="font-size:14px">일</span></div><div class="l">🔥 연속</div></div>
-      <div class="stat"><div class="n">${solvedToday}</div><div class="l">오늘 푼 문제</div></div>
-      <div class="stat"><div class="n">${d.totalSolved||0}</div><div class="l">누적 문제</div></div>
+      <div class="stat y"><div class="n">${d.streak.days||0}<span style="font-size:14px">일</span></div><div class="l">🔥 연속</div></div>
+      <div class="stat b"><div class="n">${solvedToday}</div><div class="l">오늘 푼 문제</div></div>
+      <div class="stat p"><div class="n">${d.totalSolved||0}</div><div class="l">누적 문제</div></div>
     </div>
-    <div class="sec-title">모드 선택</div>
-    <button class="btn primary big" id="m1"><div class="t">🎯 스킬 드릴</div><div class="d">분수 비교 · 곱셈 비교 한 유형씩 집중 반복</div></button>
-    <button class="btn big" id="m2"><div class="t">🔀 복합 훈련</div><div class="d">분수·곱셈 비교를 섞은 실전 세트</div></button>
-    <button class="btn big" id="m3"><div class="t">📈 기록실</div><div class="d">유형별 최고기록·성장그래프</div></button>
+    <div class="sec-title">암산 훈련</div>
+    <button class="btn primary big" id="m1"><div class="t"><span class="ic">🎯</span>스킬 드릴</div><div class="d">분수 비교 · 곱셈 비교 한 유형씩 집중 반복</div></button>
+    <button class="btn big" id="m2"><div class="t"><span class="ic b">🔀</span>복합 훈련</div><div class="d">분수·곱셈 비교를 섞은 실전 세트</div></button>
+    <button class="btn big" id="m3"><div class="t"><span class="ic g">📈</span>기록실</div><div class="d">유형별 최고기록·성장그래프</div></button>
     <div class="sec-title">개념 공부</div>
-    <button class="btn big" id="m4"><div class="t">📚 개념 학습</div><div class="d">자료해석 개념 설명 + 숫자가 매번 바뀌는 예제 (${CONCEPTS.length}개 개념)</div></button>
+    <button class="btn big" id="m4"><div class="t"><span class="ic p">📚</span>개념 학습</div><div class="d">자료해석 개념 설명 + 숫자가 매번 바뀌는 예제 (${CONCEPTS.length}개 개념)</div></button>
     <div class="hint">💡 사파리/크롬 메뉴 → "홈 화면에 추가"하면 앱처럼 실행됩니다. 기록은 이 폰에 저장돼요.</div>
   `;
   document.getElementById('m1').onclick=()=>go(screenDrillMenu);
@@ -262,51 +272,76 @@ function screenHome(){
 /* ================= 개념 학습 ================= */
 function cdb(id){const d=db();d.concepts=d.concepts||{};return d.concepts[id]||{done:false,n:0,w:0};}
 function csave(id,rec){const d=db();d.concepts=d.concepts||{};d.concepts[id]=rec;save(d);}
+const GROUP=id=>GROUPS.find(g=>g.id===id);
 function screenConcepts(){
   S.cc=S.cc||{subj:'data',hide:true};
-  const list=CONCEPTS.filter(c=>c.subj===S.cc.subj);
-  const shown=list.filter(c=>!(S.cc.hide&&cdb(c.id).done));
-  const doneN=list.filter(c=>cdb(c.id).done).length;
-  const card=c=>{const r=cdb(c.id);
-    return `<div class="btn ccard ${r.done?'isdone':''}" data-id="${c.id}" style="padding:14px">
-      <div class="body"><div class="t">${c.name}</div><div class="d">${c.desc}${r.n?`<br>예제 ${r.n}문항 · 정답률 ${Math.round((r.n-r.w)/r.n*100)}%`:''}</div></div>
-      <button class="done ${r.done?'on':''}" data-done="${c.id}">${r.done?'✓ 완료':'완료'}</button>
-    </div>`;};
+  const groups=GROUPS.filter(g=>g.subj===S.cc.subj);
+  const gcard=g=>{const list=CONCEPTS.filter(c=>c.group===g.id);const dn=list.filter(c=>cdb(c.id).done).length;
+    return `<button class="btn big gcard" data-g="${g.id}" style="border-left-color:${g.color}">
+      <div class="t"><span class="ic" style="background:${g.color}22">${g.icon}</span>${g.name}</div>
+      <div class="d">${g.desc} · 개념 ${list.length}개${dn?` · 완료 ${dn}개`:''}</div>
+      ${list.length?`<div class="gbar"><div style="width:${Math.round(dn/list.length*100)}%;background:${g.color}"></div></div>`:''}
+    </button>`;};
   app().innerHTML=`
     <button class="back" id="bk">‹ 홈</button>
     <h1>개념 학습</h1><div class="sub">설명을 읽고, 숫자가 바뀌는 예제로 익히기</div>
     <div class="seg" id="subj">${SUBJECTS.map(s=>`<button data-s="${s.k}" class="${s.k===S.cc.subj?'on':''}">${s.n}</button>`).join('')}</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 8px">
-      <span class="sec-title" style="margin:0">개념 ${shown.length}개${doneN?` · 완료 ${doneN}개`:''}</span>
-      <span class="chip ${S.cc.hide?'on':''}" id="hide" style="margin:0;cursor:pointer">${S.cc.hide?'완료 숨김 중':'완료 포함'}</span>
-    </div>
-    ${list.length?(shown.length?shown.map(card).join(''):`<div class="muted" style="margin-top:20px">모든 개념을 완료했어요 🎉<br>위 "완료 숨김 중"을 눌러 다시 볼 수 있어요.</div>`):`<div class="muted" style="margin-top:30px">이 과목은 아직 개념이 없어요.<br>교재 내용을 주시면 추가됩니다.</div>`}
+    <div class="sec-title">단원</div>
+    ${groups.length?groups.map(gcard).join(''):`<div class="muted" style="margin-top:30px">이 과목은 아직 개념이 없어요.<br>교재 내용을 주시면 추가됩니다.</div>`}
   `;
   document.getElementById('bk').onclick=()=>go(screenHome);
   app().querySelectorAll('#subj button').forEach(b=>b.onclick=()=>{S.cc.subj=b.dataset.s;screenConcepts();});
-  document.getElementById('hide').onclick=()=>{S.cc.hide=!S.cc.hide;screenConcepts();};
+  app().querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>go(()=>screenGroup(b.dataset.g)));
+}
+function screenGroup(gid){
+  const g=GROUP(gid); S.cc=S.cc||{subj:'data',hide:true};
+  const list=CONCEPTS.filter(c=>c.group===gid);
+  const shown=list.filter(c=>!(S.cc.hide&&cdb(c.id).done));
+  const doneN=list.filter(c=>cdb(c.id).done).length;
+  const card=(c,i)=>{const r=cdb(c.id);
+    return `<div class="btn ccard ${r.done?'isdone':''}" data-id="${c.id}" style="border-left-color:${g.color}">
+      <span class="num" style="color:${g.color}">${list.indexOf(c)+1}</span>
+      <div class="body"><div class="t">${c.name}</div><div class="d">${c.desc}${r.n?` · 정답률 ${Math.round((r.n-r.w)/r.n*100)}% (${r.n}문항)`:''}</div></div>
+      <button class="done ${r.done?'on':''}" data-done="${c.id}">${r.done?'✓':'완료'}</button>
+    </div>`;};
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 개념 학습</button>
+    <h1><span class="ic" style="background:${g.color}22;vertical-align:-4px">${g.icon}</span>${g.name}</h1><div class="sub">${g.desc}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 8px">
+      <span class="sec-title" style="margin:0">개념 ${list.length}개${doneN?` · 완료 ${doneN}개`:''}</span>
+      <span class="chip ${S.cc.hide?'on':''}" id="hide" style="margin:0;cursor:pointer;font-size:12px">${S.cc.hide?'완료 숨김 중':'완료 포함'}</span>
+    </div>
+    ${shown.length?shown.map(card).join(''):`<div class="muted" style="margin-top:20px">이 단원의 개념을 모두 완료했어요 🎉<br>위 "완료 숨김 중"을 눌러 다시 볼 수 있어요.</div>`}
+  `;
+  document.getElementById('bk').onclick=()=>go(screenConcepts);
+  document.getElementById('hide').onclick=()=>{S.cc.hide=!S.cc.hide;screenGroup(gid);};
   app().querySelectorAll('.ccard').forEach(c=>c.onclick=e=>{if(e.target.dataset.done)return;go(()=>screenConcept(c.dataset.id));});
-  app().querySelectorAll('[data-done]').forEach(b=>b.onclick=e=>{e.stopPropagation();const r=cdb(b.dataset.done);r.done=!r.done;csave(b.dataset.done,r);screenConcepts();if(r.done)toast('완료로 표시했어요');});
+  app().querySelectorAll('[data-done]').forEach(b=>b.onclick=e=>{e.stopPropagation();const r=cdb(b.dataset.done);r.done=!r.done;csave(b.dataset.done,r);screenGroup(gid);if(r.done)toast('완료로 표시했어요');});
 }
 function screenConcept(id){
-  const c=CONCEPTS.find(x=>x.id===id); const r=cdb(id);
+  const c=CONCEPTS.find(x=>x.id===id); const r=cdb(id); const g=GROUP(c.group);
   S.cex=S.cex||{}; const exi=S.cex[id]||0;
+  const list=CONCEPTS.filter(x=>x.group===c.group); const idx=list.indexOf(c); const next=list[idx+1];
   app().innerHTML=`
-    <button class="back" id="bk">‹ 개념 목록</button>
-    <h1 style="font-size:22px">${c.name}</h1><div class="sub">${c.desc}</div>
+    <button class="back" id="bk">‹ ${g.name}</button>
+    <div class="sub" style="margin-bottom:2px;color:${g.color};font-weight:700">${g.icon} ${g.name} · ${idx+1}/${list.length}</div>
+    <h1 style="font-size:22px;margin-top:4px">${c.name}</h1><div class="sub">${c.desc}</div>
     <div class="card exp">${c.exp}</div>
     <div class="sec-title">예제 · 매번 숫자가 바뀜</div>
     ${c.examples.length>1?`<div class="seg" id="exseg" style="margin-bottom:10px">${c.examples.map((e,i)=>`<button data-i="${i}" class="${i===exi?'on':''}">${e.title}</button>`).join('')}</div>`:''}
     <div class="card" id="exbox"></div>
     <div class="row"><button class="btn primary center" id="grade">채점 ✔</button><button class="btn center" id="regen">새 숫자로 🔁</button></div>
-    <button class="btn center" id="done" style="${r.done?'color:var(--green)':''}">${r.done?'✓ 완료된 개념 (눌러서 해제)':'이 개념 완료로 표시'}</button>
+    <div class="row"><button class="btn center" id="bk2">‹ ${g.name} 목록</button><button class="btn center" id="done" style="${r.done?'color:var(--green)':''}">${r.done?'✓ 완료 (해제)':'완료로 표시 ✓'}</button></div>
+    ${next?`<button class="btn center" id="next">다음 개념: ${next.name} ›</button>`:`<button class="btn center" id="home2">홈으로</button>`}
   `;
-  document.getElementById('bk').onclick=()=>go(screenConcepts);
+  const back=()=>go(()=>screenGroup(c.group));
+  document.getElementById('bk').onclick=back; document.getElementById('bk2').onclick=back;
+  if(next)document.getElementById('next').onclick=()=>go(()=>screenConcept(next.id)); else document.getElementById('home2').onclick=()=>go(screenHome);
   app().querySelectorAll('#exseg button').forEach(b=>b.onclick=()=>{S.cex[id]=+b.dataset.i;screenConcept(id);});
   const render=()=>{S.ex=c.examples[exi].gen();renderExample(S.ex);document.getElementById('grade').disabled=false;};
   document.getElementById('regen').onclick=()=>{render();document.getElementById('exbox').scrollIntoView({behavior:'smooth',block:'start'});};
   document.getElementById('grade').onclick=()=>gradeExample(id);
-  document.getElementById('done').onclick=()=>{const rr=cdb(id);rr.done=!rr.done;csave(id,rr);toast(rr.done?'완료로 표시했어요':'완료 해제');screenConcept(id);};
+  document.getElementById('done').onclick=()=>{const rr=cdb(id);rr.done=!rr.done;csave(id,rr);toast(rr.done?'완료로 표시했어요':'완료 해제');const y=window.scrollY;screenConcept(id);window.scrollTo(0,y);};
   render();
 }
 function renderExample(ex){
