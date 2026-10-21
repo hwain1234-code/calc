@@ -28,7 +28,7 @@
   .sub{color:var(--sub);font-size:13px;margin-bottom:18px}
   .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,.05)}
   .ic{display:inline-flex;width:34px;height:34px;border-radius:10px;align-items:center;justify-content:center;font-size:18px;margin-right:10px;vertical-align:middle}
-  .ic.y{background:rgba(255,212,0,.16)} .ic.b{background:rgba(96,165,250,.18)} .ic.g{background:rgba(52,199,89,.18)} .ic.p{background:rgba(167,139,250,.2)}
+  .ic.y{background:rgba(255,212,0,.16)} .ic.b{background:rgba(96,165,250,.18)} .ic.g{background:rgba(52,199,89,.18)} .ic.p{background:rgba(167,139,250,.2)} .ic.m{background:rgba(94,234,212,.18)}
   .gcard{border-left:4px solid var(--purple)}
   .gbar{height:4px;background:var(--card2);border-radius:2px;margin-top:10px;overflow:hidden}
   .gbar>div{height:100%}
@@ -159,12 +159,32 @@
   .sol .cr{color:var(--green);font-weight:700}
   .sol .wr{color:var(--red);font-weight:700}
   .exsc{display:flex;gap:10px;align-items:center;justify-content:center;margin:10px 0;font-weight:700}
+  /* ===== 집중 연습 ===== */
+  .ccard.off{opacity:.55}
+  .ccard .chk{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#111}
+  .ccard .chk.on{background:var(--green);border-color:var(--green);color:#fff}
+  #pq .qrow{display:flex;gap:8px;align-items:center;margin-top:14px}
+  #pq input{flex:1;background:#0d0d0f;color:var(--yellow);border:2px solid var(--line);border-radius:12px;padding:14px 12px;font-size:22px;font-weight:800;font-family:inherit;min-width:0;font-variant-numeric:tabular-nums}
+  #pq input:focus{outline:none;border-color:var(--yellow)}
+  .punit{flex:none;color:var(--sub);font-weight:700;font-size:15px;min-width:36px}
+  .oxb.big{margin-top:14px}
+  .oxb.big button{padding:18px;font-size:26px}
+  .pch{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .pch button{background:#0d0d0f;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left}
+  .pch button.sel{background:var(--yellow);color:#111;border-color:var(--yellow)}
+  .pch button.ok{background:var(--green);color:#fff;border-color:var(--green)}
+  .pch button.no{background:var(--red);color:#fff;border-color:var(--red)}
+  .pch button:disabled,.oxb button:disabled{cursor:default}
+  .pad{width:100%;display:block;background:#15161b;border:1px dashed var(--line);border-radius:12px;margin-top:8px;touch-action:none}
+  #pq .ctab{font-size:14px}
+  #pq .ctab th,#pq .ctab td{padding:7px 6px}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
 <script src="concepts.js"></script>
+<script src="practice.js"></script>
 <script>
 /* ================= 데이터: 문제 유형 정의 ================= */
 // sec: [S,A,B,C] — 문제 1개당 목표시간(초). D는 C 초과. (교재 등급표 비례환산)
@@ -260,6 +280,7 @@ function screenHome(){
     <button class="btn big" id="m2"><div class="t"><span class="ic b">🔀</span>복합 훈련</div><div class="d">분수·곱셈 비교를 섞은 실전 세트</div></button>
     <button class="btn big" id="m3"><div class="t"><span class="ic g">📈</span>기록실</div><div class="d">유형별 최고기록·성장그래프</div></button>
     <div class="sec-title">개념 공부</div>
+    <button class="btn big" id="m5"><div class="t"><span class="ic m">✏️</span>집중 연습</div><div class="d">약한 부분만 골라 한 문제씩 · 환율 · 인구 X명당 Y · 시속 · 연비</div></button>
     <button class="btn big" id="m4"><div class="t"><span class="ic p">📚</span>개념 학습</div><div class="d">자료해석 개념 설명 + 숫자가 매번 바뀌는 예제 (${CONCEPTS.length}개 개념)</div></button>
     <div class="hint">💡 사파리/크롬 메뉴 → "홈 화면에 추가"하면 앱처럼 실행됩니다. 기록은 이 폰에 저장돼요.</div>
   `;
@@ -267,6 +288,148 @@ function screenHome(){
   document.getElementById('m2').onclick=()=>go(screenComplexMenu);
   document.getElementById('m3').onclick=()=>go(()=>screenRecords());
   document.getElementById('m4').onclick=()=>go(screenConcepts);
+  document.getElementById('m5').onclick=()=>go(screenPractice);
+}
+
+/* ================= 집중 연습 (한 문제씩) ================= */
+function pdb(){const d=db();d.practice=d.practice||{topics:{},wrong:[]};return d;}
+function screenPractice(){
+  S.pr=S.pr||{sel:PTOPICS.slice(),count:10,pen:false};
+  const d=pdb();
+  const chip=k=>{const t=PRACTICE[k],st=d.practice.topics[k]||{n:0,w:0};const on=S.pr.sel.includes(k);
+    return `<button class="btn ccard ${on?'':'off'}" data-t="${k}" style="border-left-color:${t.color};padding:12px 14px">
+      <span class="ic" style="background:${t.color}22;margin:0">${t.icon}</span>
+      <div class="body"><div class="t">${t.name}</div><div class="d">${t.desc}${st.n?` · 정답률 ${Math.round((st.n-st.w)/st.n*100)}% (${st.n}문)`:''}</div></div>
+      <span class="chk ${on?'on':''}">${on?'✓':''}</span></button>`;};
+  const wrongN=d.practice.wrong.length;
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 홈</button>
+    <h1>집중 연습</h1><div class="sub">부족한 주제만 골라서, 한 문제씩 바로 확인</div>
+    <div class="sec-title">연습할 주제 (여러 개 선택)</div>
+    ${PTOPICS.map(chip).join('')}
+    <div class="card" style="margin-top:4px"><div class="sec-title" style="margin-top:0">문제 수</div>
+      <div class="seg" id="seg">${[5,10,20].map(o=>`<button data-c="${o}" class="${o===S.pr.count?'on':''}">${o}문제</button>`).join('')}</div>
+      <div class="hint">숫자 입력 · O/X · 고르기 형식이 섞여 나오고, 3문제 중 1문제쯤은 어림이 필요한 실전형 숫자로 나와요 (±2% 허용). 틀린 문제는 세트 끝에 한 번 더 나옵니다.</div>
+    </div>
+    <button class="btn primary big center" id="start">시작 ▶</button>
+    ${wrongN?`<button class="btn center" id="wrongs">최근 틀린 문제 다시 풀기 (${wrongN}) 🔁</button>`:''}
+  `;
+  document.getElementById('bk').onclick=()=>go(screenHome);
+  app().querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const k=b.dataset.t;const i=S.pr.sel.indexOf(k);if(i>=0)S.pr.sel.splice(i,1);else S.pr.sel.push(k);screenPractice();});
+  app().querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{S.pr.count=+b.dataset.c;app().querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));});
+  document.getElementById('start').onclick=()=>{
+    if(!S.pr.sel.length){toast('주제를 하나 이상 고르세요');return;}
+    const qs=[];for(let i=0;i<S.pr.count;i++){const k=S.pr.sel[i%S.pr.sel.length];const q=cpick(PRACTICE[k].tpl)();q.topic=k;qs.push(q);}
+    startPractice(cshuffle(qs),{retry:false});
+  };
+  const wb=document.getElementById('wrongs'); if(wb)wb.onclick=()=>startPractice(pdb().practice.wrong.slice(-S.pr.count).map(w=>w.q),{retry:true});
+}
+function startPractice(qs,meta){
+  S.ps={qs,meta,i:0,res:[],start:Date.now(),timer:null,requeue:[]};
+  renderPractice();
+  S.ps.timer=setInterval(()=>{const e=document.getElementById('ptimer');if(e)e.textContent=fmt(Date.now()-S.ps.start);},500);
+}
+function renderPractice(){
+  const s=S.ps, q=s.qs[s.i], t=PRACTICE[q.topic], total=s.qs.length;
+  let input;
+  if(q.kind==='num')input=`<div class="qrow"><input id="pin" inputmode="decimal" placeholder="답 입력" autocomplete="off"><span class="punit">${q.unit||''}</span></div>`;
+  else if(q.kind==='ox')input=`<div class="oxb big"><button data-ox="1">O</button><button data-ox="0">X</button></div>`;
+  else input=`<div class="pch">${q.choices.map((c,i)=>`<button data-ch="${i}">${c}</button>`).join('')}</div>`;
+  app().innerHTML=`
+    <div class="prog"><span>${s.i+1} / ${total}${s.meta.retry?' · 재도전':''}</span><span class="timer" id="ptimer">${fmt(Date.now()-s.start)}</span>
+      <span><button class="back" id="quit" style="padding:0;font-size:14px">종료</button></span></div>
+    <div class="pbar"><div style="width:${Math.round(s.i/total*100)}%;background:${t.color}"></div></div>
+    <div class="card" id="pq" style="border-left:4px solid ${t.color}">
+      <div class="qtag" style="color:${t.color}">${t.icon} ${t.name}</div>
+      <div class="exp" style="font-size:16px">${q.html}</div>
+      ${input}
+      <div id="pfb"></div>
+    </div>
+    <div class="row" id="pact"><button class="btn primary center" id="psub">확인 ✔</button><button class="btn center" id="pskip">모르겠음 →</button></div>
+    <div class="card" style="padding:10px 12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="sec-title" style="margin:0">✍️ 연습장</span>
+        <span style="display:flex;gap:6px">
+          <span class="chip ${S.pr.pen?'on':''}" id="pen" style="margin:0;font-size:11px;padding:4px 10px;cursor:pointer">펜슬만</span>
+          <span class="chip" id="clr" style="margin:0;font-size:11px;padding:4px 10px;cursor:pointer">지우기</span>
+        </span></div>
+      <canvas id="pad" class="pad"></canvas>
+    </div>
+  `;
+  document.getElementById('quit').onclick=()=>finishPractice(true);
+  setupPad();
+  const submit=val=>answerPractice(val);
+  const pin=document.getElementById('pin'); if(pin){pin.focus();pin.onkeydown=e=>{if(e.key==='Enter')submit(pin.value);};}
+  app().querySelectorAll('[data-ox]').forEach(b=>b.onclick=()=>{app().querySelectorAll('[data-ox]').forEach(x=>x.classList.toggle('sel',x===b));submit(b.dataset.ox==='1');});
+  app().querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{app().querySelectorAll('[data-ch]').forEach(x=>x.classList.toggle('sel',x===b));submit(+b.dataset.ch);});
+  document.getElementById('psub').onclick=()=>{if(q.kind==='num')submit(pin.value);else{const sel=app().querySelector('.sel');if(!sel){toast('답을 고르세요');return;}submit(sel.dataset.ox!==undefined?sel.dataset.ox==='1':+sel.dataset.ch);}};
+  document.getElementById('pskip').onclick=()=>submit(null);
+  document.onkeydown=null;
+}
+function answerPractice(val){
+  const s=S.ps; if(s._done)return; s._done=true;
+  const q=s.qs[s.i];
+  let ok=false, shown='';
+  if(q.kind==='num'){const x=parseFloat(String(val??'').replace(/,/g,''));ok=!isNaN(x)&&Math.abs(x-q.ans)<=Math.max(0.011,Math.abs(q.ans)*(q.tol||0.006));shown=val===null||val===''?'미입력':val;}
+  else if(q.kind==='ox'){ok=val===q.ans;shown=val===null?'미선택':(val?'O':'X');}
+  else {ok=val===q.ans;shown=val===null?'미선택':q.choices[val];}
+  s.res.push({q,ok,your:shown});
+  // 통계
+  const d=pdb();const st=d.practice.topics[q.topic]=d.practice.topics[q.topic]||{n:0,w:0};st.n++;if(!ok)st.w++;
+  if(!ok){d.practice.wrong.push({ts:Date.now(),q});if(d.practice.wrong.length>50)d.practice.wrong=d.practice.wrong.slice(-50);}
+  else if(s.meta.retry){d.practice.wrong=d.practice.wrong.filter(w=>w.q!==q&&w.q.html!==q.html);} // 재도전에서 맞히면 목록에서 제거
+  save(d);
+  if(!ok&&!s.meta.retry&&!q._requeued){const again=Object.assign({},q,{_requeued:true});s.requeue.push(again);}
+  // 피드백
+  const ansText=q.kind==='num'?`${Nd(Math.round(q.ans*100)/100)}${q.unit||''}`:q.kind==='ox'?(q.ans?'O':'X'):q.choices[q.ans];
+  document.getElementById('pfb').innerHTML=`<div class="sol ${ok?'ok':''}" style="font-size:14px"><span class="${ok?'cr':'wr'}" style="font-size:16px">${ok?'○ 정답':'✕ 오답'}</span> · 정답 <b>${ansText}</b>${ok?'':` <span style="color:var(--sub)">(내 답 ${shown})</span>`}<br>${q.why}</div>`;
+  document.getElementById('pq').className='card '+(ok?'flash-ok':'flash-no');
+  app().querySelectorAll('#pq input,#pq button').forEach(b=>{b.disabled=true;});
+  if(q.kind==='ox')app().querySelectorAll('[data-ox]').forEach(b=>{if((b.dataset.ox==='1')===q.ans)b.classList.add('ok');else if(b.classList.contains('sel'))b.classList.add('no');});
+  if(q.kind==='choice')app().querySelectorAll('[data-ch]').forEach(b=>{if(+b.dataset.ch===q.ans)b.classList.add('ok');else if(b.classList.contains('sel'))b.classList.add('no');});
+  document.getElementById('pact').innerHTML=`<button class="btn primary center" id="pnext">${s.i+1<s.qs.length||s.requeue.length?'다음 ›':'결과 보기'}</button>`;
+  const next=()=>{s._done=false;s.i++;if(s.i>=s.qs.length){if(s.requeue.length){s.qs=s.qs.concat(s.requeue);s.requeue=[];toast('틀린 문제 다시 나와요');}else{finishPractice();return;}}renderPractice();};
+  document.getElementById('pnext').onclick=next; document.getElementById('pnext').focus();
+  document.onkeydown=e=>{if(e.key==='Enter')next();};
+}
+function finishPractice(early){
+  const s=S.ps;clearInterval(s.timer);document.onkeydown=null;
+  if(!s.res.length){go(screenPractice);return;}
+  const sec=Math.round((Date.now()-s.start)/10)/100;
+  const by={};s.res.forEach(r=>{const b=by[r.q.topic]=by[r.q.topic]||{n:0,w:0};b.n++;if(!r.ok)b.w++;});
+  const n=s.res.length,w=s.res.filter(r=>!r.ok).length;
+  app().innerHTML=`
+    <button class="back" id="bk">‹ 집중 연습</button>
+    <h1>연습 결과</h1>${early?'<div class="sub">⏸ 중간 종료 · 푼 문제만 집계</div>':''}
+    <div class="grid3">
+      <div class="stat y"><div class="n">${n-w} / ${n}</div><div class="l">정답</div></div>
+      <div class="stat b"><div class="n">${fmt(sec*1000)}</div><div class="l">걸린 시간</div></div>
+      <div class="stat p"><div class="n">${Nd((sec/n).toFixed(1))}<span style="font-size:13px">초</span></div><div class="l">문제당</div></div>
+    </div>
+    <div class="sec-title">주제별</div>
+    <div class="card">${Object.keys(by).map(k=>{const t=PRACTICE[k],b=by[k],p=Math.round((b.n-b.w)/b.n*100);return `<div class="bar"><span class="lb" style="color:${t.color}">${t.icon} ${t.name}</span><div class="tr"><div style="width:${p}%;background:${t.color}"></div></div><span class="nn">${b.n-b.w}/${b.n} · ${p}%</span></div>`;}).join('')}</div>
+    ${w?`<div class="sec-title">틀린 문제 (${w})</div>${s.res.filter(r=>!r.ok).map(r=>`<div class="wrong" style="display:block"><div class="exp" style="font-size:14px">${r.q.html}</div><div class="sol">내 답 <span class="wr">${r.your}</span> · 정답 <b>${r.q.kind==='num'?Nd(Math.round(r.q.ans*100)/100)+(r.q.unit||''):r.q.kind==='ox'?(r.q.ans?'O':'X'):r.q.choices[r.q.ans]}</b><br>${r.q.why}</div></div>`).join('')}`:`<div class="muted" style="margin-top:16px">✅ 전부 정답!</div>`}
+    <div style="height:12px"></div>
+    <button class="btn primary big center" id="again">같은 설정으로 한 세트 더 🔁</button>
+    <button class="btn center" id="home">홈으로</button>
+  `;
+  document.getElementById('bk').onclick=()=>go(screenPractice);
+  document.getElementById('home').onclick=()=>go(screenHome);
+  document.getElementById('again').onclick=()=>{go(screenPractice);document.getElementById('start').click();};
+}
+/* 연습장 (펜슬/손가락 자유 필기, 저장 안 함) */
+function setupPad(){
+  const c=document.getElementById('pad'); if(!c)return;
+  const dpr=window.devicePixelRatio||1; const w=c.clientWidth||300, h=180;
+  c.width=w*dpr; c.height=h*dpr; c.style.height=h+'px';
+  const ctx=c.getContext('2d'); ctx.scale(dpr,dpr); ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#fff';
+  let drawing=false;
+  const pos=e=>{const r=c.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];};
+  c.onpointerdown=e=>{if(S.pr.pen&&e.pointerType==='touch')return;drawing=true;c.setPointerCapture(e.pointerId);const [x,y]=pos(e);ctx.beginPath();ctx.moveTo(x,y);e.preventDefault();};
+  c.onpointermove=e=>{if(!drawing)return;const [x,y]=pos(e);ctx.lineTo(x,y);ctx.stroke();e.preventDefault();};
+  c.onpointerup=c.onpointercancel=()=>{drawing=false;};
+  document.getElementById('clr').onclick=()=>ctx.clearRect(0,0,w,h);
+  document.getElementById('pen').onclick=()=>{S.pr.pen=!S.pr.pen;document.getElementById('pen').classList.toggle('on',S.pr.pen);toast(S.pr.pen?'펜슬만 입력 (손가락은 스크롤)':'손가락도 입력');};
 }
 
 /* ================= 개념 학습 ================= */
