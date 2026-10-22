@@ -163,7 +163,7 @@ const RCTX2=[ // 관계성: 두 부분으로 나뉘는 문맥
 const COLS=(n,label)=>['A','B','C','D','E','F'].slice(0,n).map(x=>`${x}${label}`);
 // 전체값(4~5자리 자연스러운 수)과 기준선 근처 부분값
 const genWhole=()=>cpick([CR(1200,9800),CR(10500,89900)]);
-const nearRatio=th=>{const sign=Math.random()<.5?-1:1;return th*(1+sign*(CR(2,12)/100));};
+const nearRatio=th=>{const sign=Math.random()<.5?-1:1;let r=th*(1+sign*(CR(2,12)/100));if(r>97)r=th+CR(1,Math.max(1,97-th));if(r<1)r=1;return r;}; // 97%를 넘지 않게 (부분 > 전체 방지)
 const pct1=x=>Nd((Math.round(x*10)/10).toString())+'%';
 // 표 + 문장 공통 조립
 function ratioQ(ctx,n,th,fn,why,opt={}){
@@ -227,6 +227,7 @@ function compose(total,idx,s){
   const target=Math.round(total*s/100);let rest=total-target;const parts=[0,0,0,0];parts[idx]=target;
   const others=[0,1,2,3].filter(i=>i!==idx);const w=others.map(()=>CR(2,10));const ws=w.reduce((a,b)=>a+b,0);
   others.forEach((i,k)=>{parts[i]=k<2?Math.round(rest*w[k]/ws):0;});parts[others[2]]=rest-parts[others[0]]-parts[others[1]];
+  if(parts.some(v=>v<0)){const lo=others[2];const big=others[0];parts[big]+=parts[lo];parts[lo]=0;} // 안전장치: 음수 방지
   return parts;
 }
 const shareWhy=(p,w)=>`${N(p)}/${N(w)} ≈ ${pct1(p/w*100)}`;
