@@ -369,7 +369,7 @@ function renderPractice(){
       ${input}
       <div id="pfb"></div>
     </div>
-    <div class="row" id="pact"><button class="btn primary center" id="psub">확인 ✔</button><button class="btn center" id="pskip">모르겠음 →</button></div>
+    <div class="row" id="pact">${q.kind==='num'?`<button class="btn primary center" id="psub">확인 ✔</button>`:''}</div>
     <div class="card" style="padding:10px 12px">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <span class="sec-title" style="margin:0">✍️ 연습장</span>
@@ -386,8 +386,7 @@ function renderPractice(){
   const pin=document.getElementById('pin'); if(pin){pin.focus();pin.onkeydown=e=>{if(e.key==='Enter')submit(pin.value);};}
   app().querySelectorAll('[data-ox]').forEach(b=>b.onclick=()=>{app().querySelectorAll('[data-ox]').forEach(x=>x.classList.toggle('sel',x===b));submit(b.dataset.ox==='1');});
   app().querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{app().querySelectorAll('[data-ch]').forEach(x=>x.classList.toggle('sel',x===b));submit(+b.dataset.ch);});
-  document.getElementById('psub').onclick=()=>{if(q.kind==='num')submit(pin.value);else{const sel=app().querySelector('.sel');if(!sel){toast('답을 고르세요');return;}submit(sel.dataset.ox!==undefined?sel.dataset.ox==='1':+sel.dataset.ch);}};
-  document.getElementById('pskip').onclick=()=>submit(null);
+  const psub=document.getElementById('psub'); if(psub)psub.onclick=()=>submit(pin.value);
   document.onkeydown=null;
 }
 function answerPractice(val){
