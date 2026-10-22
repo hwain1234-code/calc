@@ -173,15 +173,14 @@ function layoutTable(ents,series){
 /* "분모 대비 분자" 문장을 여러 표현으로. f(r)은 비율 r(%)일 때 문장의 정오 */
 function phraseRatio(col,p,w,th){
   const ge=`<b>${th}% 이상</b>이다`;
-  const v=CR(1,7);
-  if(v===1)return {t:`${col}의 ${w} 대비 ${p}의 비율은 ${ge}`,f:r=>r>=th};
-  if(v===2)return {t:`${col}의 ${w} 중 ${p}의 비중은 ${ge}`,f:r=>r>=th};
-  if(v===3)return {t:`${col}의 ${josa(p,'은','는')} ${w}의 ${ge}`,f:r=>r>=th};
-  if(v===4)return {t:`${col}의 ${josa(p,'이','가')} ${w}에서 차지하는 비중은 ${ge}`,f:r=>r>=th};
-  if(v===5)return {t:`${col}의 ${w}에 대한 ${p}의 비율은 ${ge}`,f:r=>r>=th};
-  if(v===6)return {t:`${col}의 ${w} 중 ${p}의 비중은 <b>${th}% 미만</b>이다`,f:r=>r<th};
-  if([20,25,50].includes(th))return {t:`${col}의 ${josa(w,'은','는')} ${p}의 <b>${100/th}배 이상</b>이다`,f:r=>r<=th}; // 뒤집은 표현: 5배 이상 ⇔ 20% 이하
-  return {t:`${col}의 ${p} 대비 ${w}의 비율은 <b>${Math.round(100/th*100)/100}배 미만</b>이다`,f:r=>r>th}; // 전체/부분 < 100/th ⇔ 부분/전체 > th
+  const lt=`<b>${th}% 미만</b>이다`;
+  const v=CR(1,6);const neg=Math.random()<.3; // 30%는 "미만" 문장
+  if(v===1)return {t:`${col}의 ${w} 대비 ${p}의 비율은 ${neg?lt:ge}`,f:r=>neg?r<th:r>=th};
+  if(v===2)return {t:`${col}의 ${w} 중 ${p}의 비중은 ${neg?lt:ge}`,f:r=>neg?r<th:r>=th};
+  if(v===3)return {t:`${col}의 ${josa(p,'은','는')} ${w}의 ${neg?lt:ge}`,f:r=>neg?r<th:r>=th};
+  if(v===4)return {t:`${col}의 ${josa(p,'이','가')} ${w}에서 차지하는 비중은 ${neg?lt:ge}`,f:r=>neg?r<th:r>=th};
+  if(v===5)return {t:`${col}의 ${w}에 대한 ${p}의 비율은 ${neg?lt:ge}`,f:r=>neg?r<th:r>=th};
+  return {t:`${col}에서 ${josa(p,'이','가')} ${w}에 차지하는 비율은 ${neg?lt:ge}`,f:r=>neg?r<th:r>=th};
 }
 const verdict=ans=>` → 문장은 <b>${ans?'옳다 O':'틀리다 X'}</b>`;
 // 전체값(4~5자리 자연스러운 수)과 기준선 근처 부분값
