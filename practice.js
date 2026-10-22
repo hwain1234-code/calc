@@ -227,8 +227,8 @@ Object.assign(PRACTICE,{
         const lead=Math.floor(w/1000), easy=Number.isInteger(lead*th/10)||lead<=12; // 12×6=72 처럼 두 자리 곱으로 떨어지면 쉬움
         const w0=(w>=10000&&!easy)?Math.floor(w/10000)*10000:Math.floor(w/1000)*1000, wr=w-w0;
         const need0=w0*th/100, remP=p-need0;
-        const lead=w0%10000===0?`${N(w0/10000)}만`:`${N(w0/1000)}천`;
-        const pick=`전체 ${N(w)} → <b>${N(w0)} + ${N(wr)}</b>로 쪼갠다 (${lead} × ${th}% = ${N(need0)} 처럼 곱이 쉬운 자리에서 자른다${w>=10000?`. ${easy?'1만 단위로 자르면 나머지가 커져 손해':'천 단위 곱이 번거로워 1만 단위로'}`:''}).`;
+        const leadLabel=w0%10000===0?`${N(w0/10000)}만`:`${N(w0/1000)}천`;
+        const pick=`전체 ${N(w)} → <b>${N(w0)} + ${N(wr)}</b>로 쪼갠다 (${leadLabel} × ${th}% = ${N(need0)} 처럼 곱이 쉬운 자리에서 자른다${w>=10000?`. ${easy?'1만 단위로 자르면 나머지가 커져 손해':'천 단위 곱이 번거로워 1만 단위로'}`:''}).`;
         if(remP<=0)return `${pick} ${N(w0)}의 ${th}% = ${N(need0)} > 분자 ${N(p)} → 앞자리만으로도 못 채우니 남은 ${N(wr)}을 볼 것도 없이 ${th}% 미만`;
         const rr=remP/wr*100;
         return `${pick} ${N(w0)}의 ${th}% = ${N(need0)} → 분자에서 빼면 ${N(p)} − ${N(need0)} = <b>${N(remP)}</b>, 분모에는 <b>${N(wr)}</b>이 남는다. 남은 분수 ${N(remP)}/${N(wr)} ≈ ${pct1(rr)} → ${th}% ${rr>=th?'이상':'미만'}이므로 전체(${N(p)}/${N(w)})도 ${th}% ${ge?'이상':'미만'}`;});},
