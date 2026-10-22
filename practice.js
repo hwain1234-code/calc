@@ -215,6 +215,58 @@ Object.assign(PRACTICE,{
       return ratioQ(cpick(RCTX),cpick([4,5]),th,null,(p,w,th,ans)=>`${th}%는 애매하니 두 배로: 부분×2가 전체의 ${k2}%${k2>100?' ('+(k2/100)+'배)':''} 이상인지. ${N(p)}×2 = ${N(p*2)} vs ${N(w)}의 ${k2}% = ${N(Math.round(w*k2/100))} → ${ans?'이상 O':'미만 X'}`);},
   ]},
 });
+/* ---------- 구성비 · %p (교재 77쪽 예제 01~03 형식) ---------- */
+const CCTX=[ // 전체 + 구성 항목
+  {tot:'보유세',items:['재산세','도시계획세','공동시설세','종합부동산세'],u:'백만원'},
+  {tot:'총지출',items:['인건비','임대료','재료비','기타'],u:'백만원'},
+  {tot:'비유동자산',items:['투자자산','유형자산','무형자산','기타자산'],u:'백만원'},
+  {tot:'전체 응답자',items:['매우 만족','만족','보통','불만족'],u:'명'},
+];
+// 비중 s(%)인 항목을 포함해 total을 4개 항목으로 나눔 (항목 합 = total)
+function compose(total,idx,s){
+  const target=Math.round(total*s/100);let rest=total-target;const parts=[0,0,0,0];parts[idx]=target;
+  const others=[0,1,2,3].filter(i=>i!==idx);const w=others.map(()=>CR(2,10));const ws=w.reduce((a,b)=>a+b,0);
+  others.forEach((i,k)=>{parts[i]=k<2?Math.round(rest*w[k]/ws):0;});parts[others[2]]=rest-parts[others[0]]-parts[others[1]];
+  return parts;
+}
+const shareWhy=(p,w)=>`${N(p)}/${N(w)} ≈ ${pct1(p/w*100)}`;
+Object.assign(PRACTICE,{
+  compo:{name:'구성비·%p',icon:'⑦',color:'var(--orange)',desc:'연도별·회사별 구성 표, 비중의 %p 변화',group:'ratio',tpl:[
+    // a. 연도별 구성 표 → 특정 연도 항목 비중 N% 이상
+    ()=>{const ctx=cpick(CCTX.slice(0,2));const y0=CR(2016,2020);const years=[0,1,2,3].map(i=>y0+i+'년');const th=cpick([15,20,25,30,35,40,45,50]);
+      const yi=CR(0,3),ii=CR(0,3);const data=years.map((_,y)=>{const total=CR(12000,25000);const s=y===yi?nearRatio(th):CR(8,45);return {total,parts:compose(total,ii,s)};});
+      const p=data[yi].parts[ii],w=data[yi].total;const ans=p/w*100>=th;
+      const tbl=htable(['',...years],[[ctx.tot,...data.map(d=>N(d.total))],...ctx.items.map((it,i)=>[it,...data.map(d=>N(d.parts[i]))])]);
+      return {kind:'ox',html:`(단위: ${ctx.u})${tbl}${years[yi]} ${ctx.tot} 중 ${ctx.items[ii]}의 비중은 <b>${th}% 이상</b>이다.`,ans,why:`${shareWhy(p,w)} → ${ans?'이상 O':'미만 X'}. (${th}%는 ${th===20?'전체가 부분의 5배가 안 되는지':th===25?'전체가 부분의 4배가 안 되는지':th===50?'부분×2 vs 전체':th%10===5?'부분×2를 '+th*2+'%와 비교':'수 쪼개기'}로 빠르게)`};},
+    // b. 연도별 구성 표 → 항목 비중이 전년대비 N%p 이상 증가
+    ()=>{const ctx=cpick(CCTX.slice(0,2));const y0=CR(2016,2020);const years=[0,1,2,3].map(i=>y0+i+'년');const th=cpick([5,10,15]);
+      const yi=CR(1,3),ii=CR(0,3);const s0=CR(15,40);const s1=s0+th*(1+(Math.random()<.5?-1:1)*CR(15,50)/100);
+      const data=years.map((_,y)=>{const total=CR(12000,25000);const s=y===yi?s1:y===yi-1?s0:CR(10,45);return {total,parts:compose(total,ii,s)};});
+      const a=data[yi-1],b=data[yi];const sa=a.parts[ii]/a.total*100,sb=b.parts[ii]/b.total*100;const ans=sb-sa>=th;
+      const tbl=htable(['',...years],[[ctx.tot,...data.map(d=>N(d.total))],...ctx.items.map((it,i)=>[it,...data.map(d=>N(d.parts[i]))])]);
+      return {kind:'ox',html:`(단위: ${ctx.u})${tbl}${years[yi]} ${ctx.tot} 중 ${ctx.items[ii]}의 비중은 전년대비 <b>${th}%p 이상</b> 증가했다.`,ans,why:`${years[yi-1]} ${shareWhy(a.parts[ii],a.total)}, ${years[yi]} ${shareWhy(b.parts[ii],b.total)} → 차이 ${pct1(sb-sa).replace('%','%p')} → ${ans?'이상 O':'미만 X'}. (요령: 전년 비중에 ${th}%p를 더한 ${pct1(sa+th)}와 올해 비중을 비교)`};},
+    // c. 회사별 구성 표 → 회사 항목 비중 N% 이상
+    ()=>{const ctx=CCTX[2];const cols=COLS(4,'회사');const th=cpick([15,20,25,30,35,40,45,50]);
+      const ci=CR(0,3),ii=CR(0,3);const data=cols.map((_,c)=>{const total=CR(80000,250000);const s=c===ci?nearRatio(th):CR(8,45);return {total,parts:compose(total,ii,s)};});
+      const p=data[ci].parts[ii],w=data[ci].total;const ans=p/w*100>=th;
+      const tbl=htable(['',...cols],[[ctx.tot,...data.map(d=>N(d.total))],...ctx.items.map((it,i)=>[it,...data.map(d=>N(d.parts[i]))])]);
+      return {kind:'ox',html:`(단위: ${ctx.u})${tbl}${cols[ci]}의 ${ctx.tot} 중 ${ctx.items[ii]}의 비중은 <b>${th}% 이상</b>이다.`,ans,why:`${shareWhy(p,w)} → ${ans?'이상 O':'미만 X'}`};},
+    // d. 회사별 구성 표 → 두 회사 간 비중 차 N%p 이상
+    ()=>{const ctx=CCTX[2];const cols=COLS(4,'회사');const th=cpick([5,10,15]);
+      const [c1,c2]=cshuffle([0,1,2,3]).slice(0,2);const ii=CR(0,3);const s2=CR(12,40);const s1=s2+th*(1+(Math.random()<.5?-1:1)*CR(15,50)/100);
+      const data=cols.map((_,c)=>{const total=CR(80000,250000);const s=c===c1?s1:c===c2?s2:CR(8,45);return {total,parts:compose(total,ii,s)};});
+      const a=data[c1],b=data[c2];const sa=a.parts[ii]/a.total*100,sb=b.parts[ii]/b.total*100;const ans=sa-sb>=th;
+      const tbl=htable(['',...cols],[[ctx.tot,...data.map(d=>N(d.total))],...ctx.items.map((it,i)=>[it,...data.map(d=>N(d.parts[i]))])]);
+      return {kind:'ox',html:`(단위: ${ctx.u})${tbl}${cols[c1]}의 ${ctx.tot} 중 ${ctx.items[ii]}의 비중은 ${cols[c2]} 대비 <b>${th}%p 이상</b> 높다.`,ans,why:`${cols[c1]} ${shareWhy(a.parts[ii],a.total)}, ${cols[c2]} ${shareWhy(b.parts[ii],b.total)} → 차이 ${pct1(sa-sb).replace('%','%p')} → ${ans?'이상 O':'미만 X'}. (요령: ${cols[c2]} 비중에 ${th}%p를 더한 ${pct1(sb+th)}와 비교)`};},
+    // e. 검거/발생 연도별 → 비중의 전년대비 N%p 증가
+    ()=>{const y0=CR(2016,2020);const years=[0,1,2,3].map(i=>y0+i+'년');const th=cpick([5,10,15,20]);const yi=CR(1,3);
+      const s0=CR(35,60);const s1=s0+th*(1+(Math.random()<.5?-1:1)*CR(15,50)/100);
+      const data=years.map((_,y)=>{const w=CR(3500,9800);const s=y===yi?s1:y===yi-1?s0:CR(35,75);return {w,p:Math.round(w*s/100)};});
+      const a=data[yi-1],b=data[yi];const sa=a.p/a.w*100,sb=b.p/b.w*100;const ans=sb-sa>=th;
+      const tbl=htable(['',...years],[['검거건수(건)',...data.map(d=>N(d.p))],['발생건수(건)',...data.map(d=>N(d.w))]]);
+      return {kind:'ox',html:`${tbl}${years[yi]} 발생건수 대비 검거건수의 비중은 전년대비 <b>${th}%p 이상</b> 증가했다.`,ans,why:`${years[yi-1]} ${shareWhy(a.p,a.w)}, ${years[yi]} ${shareWhy(b.p,b.w)} → 차이 ${pct1(sb-sa).replace('%','%p')} → ${ans?'이상 O':'미만 X'}. (요령: 전년 비중 + ${th}%p = ${pct1(sa+th)} 와 올해 비중 비교, 또는 올해 분모의 ${pct1(sa+th)}를 분자와 비교)`};},
+  ]},
+});
 PRACTICE.fx.group=PRACTICE.perx.group=PRACTICE.speed.group=PRACTICE.fuel.group='unit';
 const PGROUPS=[{id:'unit',name:'분수 단위',desc:'환율·X명당·시속·연비'},{id:'ratio',name:'비중 확인 도구 (교재 76~77쪽)',desc:'기준선 근처 숫자를 도구로 빠르게 판정'}];
 const PTOPICS=Object.keys(PRACTICE);
