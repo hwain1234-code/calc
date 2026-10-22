@@ -140,4 +140,81 @@ const PRACTICE={
         why:`연료 = ${N(cost)} ÷ ${N(FUEL[f])} = ${N(cost/FUEL[f])}L → 거리 = ${N(cost/FUEL[f])} × ${e} = ${N(cost/FUEL[f]*e)}km`};},
   ]},
 };
+/* =====================================================================
+   비중 확인 도구 6가지 (교재 76~77쪽 형식: 부분/전체 표 + "비중은 N% 이상이다" 정오판단)
+   숫자는 기준선 근처(±2~12%)로 만들어 도구 없이는 애매하게 한다.
+   ===================================================================== */
+const RCTX=[ // 부분/전체 문맥
+  {p:'부채',w:'자산',u:'억원',col:'회사',s:c=>`${c}의 자산 대비 부채 비율은`},
+  {p:'확정건수',w:'신청건수',u:'건',col:'분야',s:c=>`${c}의 신청건수 대비 확정건수의 비율은`},
+  {p:'사망자',w:'사상자',u:'명',col:'지역',s:c=>`${c}의 사상자 중 사망자의 비율은`},
+  {p:'현금자산',w:'유동자산',u:'억원',col:'회사',s:c=>`${c}의 유동자산 중 현금자산의 비율은`},
+  {p:'검거건수',w:'발생건수',u:'건',col:'범죄',s:c=>`${c}의 발생건수 대비 검거건수의 비율은`},
+  {p:'수출액',w:'총매출액',u:'백만원',col:'기업',s:c=>`${c}의 총매출액 중 수출액의 비중은`},
+  {p:'여성 임원',w:'전체 임원',u:'명',col:'기관',s:c=>`${c}의 전체 임원 중 여성 임원의 비율은`},
+  {p:'재생에너지',w:'총발전량',u:'GWh',col:'국가',s:c=>`${c}의 총발전량 중 재생에너지 비중은`},
+];
+const RCTX2=[ // 관계성: 두 부분으로 나뉘는 문맥
+  {a:'남학생',b:'여학생',u:'명',col:'학교',s:c=>`${c} 학생 중 남학생의 비율은`},
+  {a:'찬성',b:'반대',u:'명',col:'지역',s:c=>`${c} 응답자 중 찬성의 비율은`},
+  {a:'국내 매출',b:'해외 매출',u:'억원',col:'회사',s:c=>`${c}의 전체 매출 중 국내 매출의 비중은`},
+  {a:'정규직',b:'비정규직',u:'명',col:'기업',s:c=>`${c}의 근로자 중 정규직의 비율은`},
+];
+const COLS=(n,label)=>['A','B','C','D','E','F'].slice(0,n).map(x=>`${x}${label}`);
+// 전체값(4~5자리 자연스러운 수)과 기준선 근처 부분값
+const genWhole=()=>cpick([CR(1200,9800),CR(10500,89900)]);
+const nearRatio=th=>{const sign=Math.random()<.5?-1:1;return th*(1+sign*(CR(2,12)/100));};
+const pct1=x=>Nd((Math.round(x*10)/10).toString())+'%';
+// 표 + 문장 공통 조립
+function ratioQ(ctx,n,th,fn,why,opt={}){
+  const cols=COLS(n,ctx.col);const rows=cols.map(()=>{const w=genWhole();const p=Math.round(w*nearRatio(th)/100);return {p,w};});
+  const i=CR(0,n-1),{p,w}=rows[i];const r=p/w*100;
+  if(Math.abs(r-th)<0.15)rows[i].p+=Math.round(w*0.01); // 거의 같으면 살짝 띄움
+  const r2=rows[i].p/w*100;const ans=r2>=th;
+  const tbl=htable(['',...cols],[[`${ctx.p}(${ctx.u})`,...rows.map(x=>N(x.p))],[`${ctx.w}(${ctx.u})`,...rows.map(x=>N(x.w))]]);
+  return {kind:'ox',html:`${tbl}${ctx.s(cols[i])} <b>${th}% 이상</b>이다.`,ans,why:why(rows[i].p,w,th,ans)+` (실제 ${pct1(r2)})`};
+}
+Object.assign(PRACTICE,{
+  pretty:{name:'예쁜 배율',icon:'①',color:'var(--orange)',desc:'20%=5배 · 25%=4배 · 50%=2배',group:'ratio',tpl:[
+    ()=>{const th=cpick([20,25,50]),k={20:5,25:4,50:2}[th];
+      return ratioQ(cpick(RCTX),cpick([3,4]),th,null,(p,w,th,ans)=>`${th}% 이상인지 = 전체가 부분의 ${k}배가 <b>안 되는지</b>. ${N(p)} × ${k} = ${N(p*k)} vs 전체 ${N(w)} → 전체가 ${w<p*k?'더 작으니 '+k+'배가 안 됨':'더 크니 '+k+'배가 넘음'} → ${th}% ${ans?'이상 O':'미만 X'}`);},
+  ]},
+  digits:{name:'수 배열',icon:'②',color:'var(--orange)',desc:'10%=수배열 · 15%=수배열의 1.5배',group:'ratio',tpl:[
+    ()=>{const th=cpick([10,15,15]);
+      return ratioQ(cpick(RCTX),cpick([3,4]),th,null,(p,w,th,ans)=>th===10
+        ?`10% 이상인지 = 부분의 수 배열(×10)이 전체보다 큰지. ${N(p)} → ${N(p*10)} vs ${N(w)} → ${p*10>=w?'크다':'작다'} → ${ans?'10% 이상 O':'10% 미만 X'}`
+        :`15% 이상인지 = 부분의 수 배열(×10)이 전체의 1.5배 이상인지. ${N(p*10)} vs ${N(w)} × 1.5 = ${N(w*1.5)} → ${p*10>=w*1.5?'이상':'미만'} → ${ans?'15% 이상 O':'15% 미만 X'}`);},
+  ]},
+  relation:{name:'관계성',icon:'③',color:'var(--orange)',desc:'전체가 없을 때: 나머지와 몇 배인지',group:'ratio',tpl:[
+    ()=>{const ctx=cpick(RCTX2);const th=cpick([20,40,50,60,80,90]);const n=cpick([4,5,6]);const cols=COLS(n,ctx.col);
+      const rows=cols.map(()=>{const x=cpick([CR(300,2500),CR(3000,19000)]);const a=Math.round(x*nearRatio(th)/100);return {a,b:x-a};});
+      const i=CR(0,n-1),{a,b}=rows[i];const r=a/(a+b)*100;const ans=r>=th;
+      const rule={20:`B(나머지)가 A의 4배가 안 되는지: ${N(a)}×4=${N(a*4)} vs ${N(b)}`,40:`나머지가 A의 1.5배가 안 되는지: ${N(a)}×1.5=${N(a*1.5)} vs ${N(b)}`,50:`A가 나머지보다 큰지: ${N(a)} vs ${N(b)}`,60:`A가 나머지의 1.5배 이상인지: ${N(b)}×1.5=${N(b*1.5)} vs ${N(a)}`,80:`A가 나머지의 4배 이상인지: ${N(b)}×4=${N(b*4)} vs ${N(a)}`,90:`A가 나머지의 9배 이상인지: ${N(b)}×9=${N(b*9)} vs ${N(a)}`}[th];
+      const tbl=htable(['',...cols],[[`${ctx.a}(${ctx.u})`,...rows.map(x=>N(x.a))],[`${ctx.b}(${ctx.u})`,...rows.map(x=>N(x.b))]]);
+      return {kind:'ox',html:`${tbl}${ctx.s(cols[i])} <b>${th}% 이상</b>이다.`,ans,why:`전체(${N(a+b)})를 구하지 말고 두 부분의 배수로 본다. ${th}% 이상인지 = ${rule} → ${ans?'이상 O':'미만 X'} (실제 ${pct1(r)})`};},
+  ]},
+  split:{name:'수 쪼개기',icon:'④',color:'var(--orange)',desc:'앞자리 분수 + 나머지 분수로 나눠 보기',group:'ratio',tpl:[
+    ()=>{const th=cpick([30,40,45,55,60,65,70]);
+      return ratioQ(cpick(RCTX),cpick([3,4]),th,null,(p,w,th,ans)=>{const unit=w>=10000?1000:100;const w0=Math.floor(w/unit)*unit,wr=w-w0;const need0=w0*th/100,needr=wr*th/100;
+        return `전체를 ${N(w0)} + ${N(wr)}로 쪼갠다. ${N(w0)}의 ${th}% = ${N(need0)}, ${N(wr)}의 ${th}% = ${N(Math.round(needr*10)/10)} → 합 ${N(Math.round((need0+needr)*10)/10)} vs 부분 ${N(p)} → ${ans?'부분이 크니 이상 O':'부분이 작으니 미만 X'}`;});},
+  ]},
+  ideal:{name:'이상적인 수',icon:'⑤',color:'var(--orange)',desc:'2/3·3/4 같은 예쁜 분수와 비교',group:'ratio',tpl:[
+    ()=>{const ctx=cpick(RCTX);const n=cpick([3,4]);const cols=COLS(n,ctx.col);
+      const IDEAL=[[1,3,'1/3',33.3],[1,2,'1/2',50],[3,5,'3/5',60],[2,3,'2/3',66.7],[3,4,'3/4',75],[4,5,'4/5',80]];
+      const rows=cols.map(()=>{const [a,b,name,val]=cpick(IDEAL);const k=cpick([1,2,3])*1000;const d0=b*k,n0=a*k;
+        const side=Math.random()<.5?1:-1;const th=Math.round(val)+side*cpick([2,3,5]); // 이상적 비율 근처의 기준선
+        const rem=CR(100,999);const remN=Math.round(rem*(th/100)*(side>0?1-CR(5,20)/100:1+CR(5,20)/100)); // 나머지 분수도 같은 쪽으로
+        return {p:n0+Math.min(remN,rem),w:d0+rem,n0,d0,name,val,th};});
+      const i=CR(0,n-1),row=rows[i];const r=row.p/row.w*100;const ans=r>=row.th;
+      const tbl=htable(['',...cols],[[`${ctx.p}(${ctx.u})`,...rows.map(x=>N(x.p))],[`${ctx.w}(${ctx.u})`,...rows.map(x=>N(x.w))]]);
+      const remP=row.p-row.n0,remW=row.w-row.d0;
+      return {kind:'ox',html:`${tbl}${ctx.s(cols[i])} <b>${row.th}% 이상</b>이다.`,ans,why:`앞자리로 이상적인 분수를 만든다: ${N(row.n0)}/${N(row.d0)} = ${row.name} ≈ ${pct1(row.val)} → ${row.th}%보다 ${row.val>=row.th?'크다':'작다'}. 나머지 ${N(remP)}/${N(remW)} ≈ ${pct1(remP/remW*100)}도 같은 쪽이므로 전체도 ${ans?'이상 O':'미만 X'} (실제 ${pct1(r)})`};},
+  ]},
+  twice:{name:'곱하기',icon:'⑥',color:'var(--orange)',desc:'35·45·55·65·75%는 두 배로',group:'ratio',tpl:[
+    ()=>{const th=cpick([35,45,55,65,75]),k2=th*2;
+      return ratioQ(cpick(RCTX),cpick([4,5]),th,null,(p,w,th,ans)=>`${th}%는 애매하니 두 배로: 부분×2가 전체의 ${k2}%${k2>100?' ('+(k2/100)+'배)':''} 이상인지. ${N(p)}×2 = ${N(p*2)} vs ${N(w)}의 ${k2}% = ${N(Math.round(w*k2/100))} → ${ans?'이상 O':'미만 X'}`);},
+  ]},
+});
+PRACTICE.fx.group=PRACTICE.perx.group=PRACTICE.speed.group=PRACTICE.fuel.group='unit';
+const PGROUPS=[{id:'unit',name:'분수 단위',desc:'환율·X명당·시속·연비'},{id:'ratio',name:'비중 확인 도구 (교재 76~77쪽)',desc:'기준선 근처 숫자를 도구로 빠르게 판정'}];
 const PTOPICS=Object.keys(PRACTICE);
