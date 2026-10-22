@@ -222,8 +222,15 @@ Object.assign(PRACTICE,{
   ]},
   split:{name:'수 쪼개기',icon:'④',color:'var(--orange)',desc:'앞자리 분수 + 나머지 분수로 나눠 보기',group:'ratio',tpl:[
     ()=>{const th=cpick([30,40,45,55,60,65,70]);
-      return ratioQ(cpick(RCTX),cpick([3,4]),th,null,(p,w,th,ge)=>{const unit=w>=10000?1000:100;const w0=Math.floor(w/unit)*unit,wr=w-w0;const need0=w0*th/100,needr=wr*th/100;
-        return `전체를 ${N(w0)} + ${N(wr)}로 쪼갠다. ${N(w0)}의 ${th}% = ${N(need0)}, ${N(wr)}의 ${th}% = ${N(Math.round(needr*10)/10)} → 합 ${N(Math.round((need0+needr)*10)/10)} vs 부분 ${N(p)} → ${ge?'부분이 크니 '+th+'% 이상':'부분이 작으니 '+th+'% 미만'}`;});},
+      return ratioQ(cpick(RCTX),cpick([3,4]),th,null,(p,w,th,ge)=>{
+        // 쪼개는 자리: 앞자리 × th 의 곱이 쉬운 쪽. 기본은 천 단위(12,360 → 12,000), 앞자리 곱이 번거로우면 만 단위(10,000)로
+        const lead=Math.floor(w/1000), easy=Number.isInteger(lead*th/10)||lead<=12; // 12×6=72 처럼 두 자리 곱으로 떨어지면 쉬움
+        const w0=(w>=10000&&!easy)?Math.floor(w/10000)*10000:Math.floor(w/1000)*1000, wr=w-w0;
+        const need0=w0*th/100, remP=p-need0;
+        const pick=`${N(w)}을(를) <b>${N(w0)} + ${N(wr)}</b>로 쪼갠다 (${N(w0/1000)}천 × ${th}% = ${N(need0)} 처럼 곱이 쉬운 자리에서 자른다${w>=10000?`. ${easy?'1만 단위로 자르면 나머지가 커져 손해':'천 단위 곱이 번거로워 1만 단위로'}`:''}).`;
+        if(remP<=0)return `${pick} ${N(w0)}의 ${th}% = ${N(need0)}인데 분자 ${N(p)}이(가) 이것도 못 채운다 → 남은 ${N(wr)}을 볼 것도 없이 ${th}% 미만`;
+        const rr=remP/wr*100;
+        return `${pick} ${N(w0)}의 ${th}% = ${N(need0)} → 분자에서 빼면 ${N(p)} − ${N(need0)} = <b>${N(remP)}</b>, 분모에서 빼면 <b>${N(wr)}</b>이 남는다. 남은 분수 ${N(remP)}/${N(wr)} ≈ ${pct1(rr)} → ${th}% ${rr>=th?'이상':'미만'}이므로 전체(${N(p)}/${N(w)})도 ${th}% ${ge?'이상':'미만'}`;});},
   ]},
   ideal:{name:'이상적인 수',icon:'⑤',color:'var(--orange)',desc:'2/3·3/4 같은 예쁜 분수와 비교',group:'ratio',tpl:[
     ()=>{const ctx=cpick(RCTX);const n=cpick([3,4]);const cols=COLS(n,ctx.col);
@@ -238,9 +245,9 @@ Object.assign(PRACTICE,{
       const remP=row.p-row.n0,remW=row.w-row.d0;
       return {kind:'ox',html:`${tbl}${ph.t}.`,ans,why:`분자(부분) = ${ctx.p} ${N(row.p)}, 분모(전체) = ${ctx.w} ${N(row.w)}. 앞자리로 이상적인 분수를 만든다: ${N(row.n0)}/${N(row.d0)} = ${row.name} ≈ ${pct1(row.val)} → ${row.th}%보다 ${row.val>=row.th?'크다':'작다'}. 나머지 ${N(remP)}/${N(remW)} ≈ ${pct1(remP/remW*100)}도 같은 쪽이므로 전체도 ${row.th}% ${ge?'이상':'미만'} (실제 ${pct1(r)})`+verdict(ans)};},
   ]},
-  twice:{name:'곱하기',icon:'⑥',color:'var(--orange)',desc:'35·45·55·65·75%는 두 배로',group:'ratio',tpl:[
-    ()=>{const th=cpick([35,45,55,65,75]),k2=th*2;
-      return ratioQ(cpick(RCTX),cpick([4,5]),th,null,(p,w,th,ge)=>`${th}%는 애매하니 두 배로: 부분×2가 전체의 ${k2}%${k2>100?' ('+(k2/100)+'배)':''} 이상인지. ${N(p)}×2 = ${N(p*2)} vs ${N(w)}의 ${k2}% = ${N(Math.round(w*k2/100))} → ${th}% ${ge?'이상':'미만'}`);},
+  twice:{name:'곱하기',icon:'⑥',color:'var(--orange)',desc:'35·45%는 두 배 해서 70·90%로',group:'ratio',tpl:[
+    ()=>{const th=cpick([35,45]),k2=th*2;
+      return ratioQ(cpick(RCTX),cpick([4,5]),th,null,(p,w,th,ge)=>`${th}%는 애매하니 두 배로: 부분×2가 전체의 ${k2}% 이상인지. ${N(p)}×2 = ${N(p*2)} vs ${N(w)}의 ${k2}% = ${N(Math.round(w*k2/100))} (${k2===70?'전체에서 30%를 뺀 값':'전체에서 10%를 뺀 값'}) → ${th}% ${ge?'이상':'미만'}`);},
   ]},
 });
 /* ---------- 구성비 · %p (교재 77쪽 예제 01~03 형식) ---------- */
