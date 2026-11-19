@@ -72,8 +72,12 @@ function screenSheet(typeId,count){
     <div class="prog"><span>${t.name} · ${count}문제</span><span class="sub" style="margin:0">S ${dec((t.sec[0]*count).toFixed(0))}초</span>
       <span><button class="back" id="quit" style="padding:0;font-size:14px">나가기</button></span></div>
     <button class="btn primary big center" id="sh-start" style="margin-top:6px">시작 ▶</button>
+    <div class="sh-wrap" id="sh-wrap">
     <div class="sh-grid cols${cols} t-${typeId}" id="sh-grid" style="grid-template-rows:repeat(${rows},auto)">
-      ${probs.map((p,i)=>`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><canvas></canvas><div class="sh-ans"></div></div></div>`).join('')}
+      ${probs.map((p,i)=>`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><div class="sh-ans"></div></div></div>`).join('')}
+    </div>
+    <canvas id="sh-ink"></canvas>
+    <button class="sh-undo" id="sh-undo" title="마지막 획 지우기">↶</button>
     </div>
     <button class="btn big center" id="sh-end" disabled style="opacity:.4">끝 ■</button>
     <div class="row" id="sh-after" style="display:none"><button class="btn primary center" id="sh-confirm">채점 확정 ✔</button><button class="btn center" id="sh-again">다시 ↻</button></div>
@@ -86,28 +90,45 @@ function screenSheet(typeId,count){
     document.getElementById('sh-start').style.display='none';
     const e=document.getElementById('sh-end');e.disabled=false;e.style.opacity='1';e.classList.add('primary');
     document.getElementById('sh-hint').textContent='다 풀면 "끝"을 펜으로 톡';
-    setupSheetCanvases(st);
+    document.getElementById('sh-wrap').classList.add('solving');
+    setupInk(st);
   };
   document.getElementById('sh-end').onpointerdown=ev=>{ev.preventDefault();if(st.phase!=='solving')return;st.end=performance.now();st.phase='grading';enterGrading(st);};
   document.getElementById('sh-again').onclick=()=>go(()=>screenSheet(typeId,count));
   document.getElementById('sh-confirm').onclick=()=>finishSheet(st);
 }
-function setupSheetCanvases(st){
+/* 답안지 전체를 덮는 필기 면. 종이처럼 아무 데나 쓰고, 첫 획이 어느 문제 줄 위에서 시작됐는지로 시간을 잰다. */
+function setupInk(st){
+  const wrap=document.getElementById('sh-wrap'),c=document.getElementById('sh-ink');
   const dpr=window.devicePixelRatio||1;
-  app().querySelectorAll('.sh-row').forEach(row=>{
-    const i=+row.dataset.i,c=row.querySelector('canvas');
-    const w=c.clientWidth||110,h=c.clientHeight||48;c.width=w*dpr;c.height=h*dpr;
-    const ctx=c.getContext('2d');ctx.scale(dpr,dpr);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fff';
-    let drawing=false;
-    const pos=e=>{const r=c.getBoundingClientRect();const k=c.clientWidth/r.width;return [(e.clientX-r.left)*k,(e.clientY-r.top)*k];};
-    c.onpointerdown=e=>{if(st.phase!=='solving')return;if(S.pr&&S.pr.pen&&e.pointerType==='touch')return;drawing=true;c.setPointerCapture(e.pointerId);
-      if(st.first[i]===null)st.first[i]=performance.now();st.strokes[i]++;const [x,y]=pos(e);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+0.1,y);ctx.stroke();e.preventDefault();};
-    c.onpointermove=e=>{if(!drawing)return;const [x,y]=pos(e);ctx.lineTo(x,y);ctx.stroke();e.preventDefault();};
-    c.onpointerup=c.onpointercancel=()=>{drawing=false;};
-  });
+  const W=wrap.clientWidth,H=wrap.clientHeight;c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fff';
+  const wr=wrap.getBoundingClientRect();
+  // 줄 영역(래퍼 기준 좌표) 캐시 → 히트테스트
+  const rows=[...wrap.querySelectorAll('.sh-row')].map(r=>{const b=r.getBoundingClientRect();const k=W/wr.width;return {i:+r.dataset.i,x:(b.left-wr.left)*k,y:(b.top-wr.top)*k,w:b.width*k,h:b.height*k};});
+  const hit=(x,y)=>{let best=null,bd=1e9;for(const r of rows){const inside=x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h;if(inside)return r.i;const dx=x<r.x?r.x-x:x>r.x+r.w?x-r.x-r.w:0,dy=y<r.y?r.y-y:y>r.y+r.h?y-r.y-r.h:0;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=r.i;}}return best;};
+  const pos=e=>{const r=c.getBoundingClientRect();const k=W/r.width;return [(e.clientX-r.left)*k,(e.clientY-r.top)*k];};
+  st.ink={strokes:[],cur:null};
+  const penSeen=()=>S.penSeen||localStorage.getItem('psatcalc_pen')==='1';
+  const allow=e=>{if(e.pointerType==='pen'){if(!S.penSeen){S.penSeen=true;try{localStorage.setItem('psatcalc_pen','1')}catch(_){}}return true;}
+    if(e.pointerType==='touch'){if(S.pr&&S.pr.pen)return false;if(penSeen())return false;return true;} return true;};
+  const width=e=>e.pointerType==='pen'?1.6+2.6*(e.pressure||0.5):2.6;
+  const drawSeg=(a,b,w)=>{ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(a[0],a[1]);const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;ctx.quadraticCurveTo(a[0],a[1],mx,my);ctx.lineTo(b[0],b[1]);ctx.stroke();};
+  c.onpointerdown=e=>{if(st.phase!=='solving'||!allow(e))return;e.preventDefault();c.setPointerCapture(e.pointerId);
+    const p=pos(e);const i=hit(p[0],p[1]);
+    if(i!==null){if(st.first[i]===null)st.first[i]=performance.now();st.strokes[i]++;}
+    st.ink.cur={row:i,pts:[p],w:width(e)};ctx.lineWidth=st.ink.cur.w;ctx.beginPath();ctx.arc(p[0],p[1],st.ink.cur.w/2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();};
+  c.onpointermove=e=>{const s=st.ink.cur;if(!s)return;e.preventDefault();
+    const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+    for(const ev of evs){const p=pos(ev);const last=s.pts[s.pts.length-1];if(Math.hypot(p[0]-last[0],p[1]-last[1])<0.7)continue;drawSeg(last,p,s.w);s.pts.push(p);}};
+  c.onpointerup=c.onpointercancel=e=>{const s=st.ink.cur;if(!s)return;st.ink.strokes.push(s);st.ink.cur=null;};
+  const redraw=()=>{ctx.clearRect(0,0,W,H);for(const s of st.ink.strokes){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.pts[0][0],s.pts[0][1],s.w/2,0,Math.PI*2);ctx.fill();for(let k=1;k<s.pts.length;k++)drawSeg(s.pts[k-1],s.pts[k],s.w);}};
+  document.getElementById('sh-undo').onpointerdown=e=>{e.preventDefault();e.stopPropagation();if(st.phase!=='solving')return;const s=st.ink.strokes.pop();if(!s)return;if(s.row!==null){st.strokes[s.row]=Math.max(0,st.strokes[s.row]-1);}redraw();};
+  st.ink.redraw=redraw;
 }
 function enterGrading(st){
   const e=document.getElementById('sh-end');e.style.display='none';
+  document.getElementById('sh-wrap').classList.add('grading'); // 필기 면은 보이되 터치는 줄로 통과
   document.getElementById('sh-after').style.display='';
   document.getElementById('sh-hint').innerHTML=`걸린 시간 <b>${fmt(st.end-st.start)}</b> · 틀린 칸을 톡 쳐서 표시한 뒤 "채점 확정"`;
   app().querySelectorAll('.sh-row').forEach(row=>{
