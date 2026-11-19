@@ -128,18 +128,23 @@ function setupInk(st){
   const dot=(g,p,w)=>{g.beginPath();g.arc(p[0],p[1],w/2,0,Math.PI*2);g.fill();};
   let predBox=null;const clearPred=()=>{if(predBox){ctx2.clearRect(predBox[0]-6,predBox[1]-6,predBox[2]-predBox[0]+12,predBox[3]-predBox[1]+12);predBox=null;}};
   const redraw=()=>{ctx.clearRect(0,0,W,H);for(const s of st.ink.strokes){dot(ctx,s.pts[0],s.pts[0][2]);for(let k=1;k<s.pts.length;k++)seg(ctx,s.pts[k-1],s.pts[k],s.pts[k][2]);}};
+  // 그리던 획을 마무리(저장). 펜을 뗄 때 pointerup이 안 오는 경우(길게 누르고 있다가 뗄 때 등)에도 다음 획이 막히지 않게 여러 경로에서 호출
+  const finish=()=>{const s=st.ink.cur;if(!s)return;clearPred();if(s.pts.length)st.ink.strokes.push(s);st.ink.cur=null;};
+  const discard=()=>{const s=st.ink.cur;if(!s)return;clearPred();st.ink.cur=null;if(s.row!==null)st.strokes[s.row]=Math.max(0,st.strokes[s.row]-1);redraw();};
   c.onpointerdown=e=>{if(st.phase!=='solving'||!allow(e))return;e.preventDefault();
     rect=c.getBoundingClientRect();
     const cur=st.ink.cur;
-    if(cur){ // 다른 포인터가 그리는 중: 펜이 들어오면 손가락 획은 버린다(손바닥). 펜이 그리는 중이면 손가락은 무시
-      if(e.pointerType==='pen'&&cur.type!=='pen'){st.ink.cur=null;if(cur.row!==null)st.strokes[cur.row]=Math.max(0,st.strokes[cur.row]-1);redraw();}
-      else return;}
+    if(cur){ // 아직 "그리는 중"으로 남아 있는 획이 있을 때
+      if(e.pointerType==='pen'){cur.type==='pen'?finish():discard();} // 펜: 이전 펜 획은 저장(떼는 이벤트를 놓친 것), 손가락 획은 손바닥이므로 버림
+      else if(cur.type==='pen')return; // 손가락이 펜 획에 끼어들면 무시
+      else finish();}
     try{c.setPointerCapture(e.pointerId);}catch(_){}
     const p=pos(e);const i=hit(p[0],p[1]);
     if(i!==null){if(st.first[i]===null)st.first[i]=performance.now();st.strokes[i]++;}
     const w=wOf(e);p.push(w);
     st.ink.cur={id:e.pointerId,type:e.pointerType,row:i,pts:[p]};dot(ctx,p,w);};
   c.onpointermove=e=>{const s=st.ink.cur;if(!s||e.pointerId!==s.id)return;e.preventDefault();
+    if(e.pointerType==='pen'&&e.buttons===0){finish();return;} // 펜이 떠서 공중(호버)에서 움직이는 중 → 획 종료
     let evs=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!evs||!evs.length)evs=[e];
     clearPred();
     for(const ev of evs){const p=pos(ev);let last=s.pts[s.pts.length-1];if(Math.hypot(p[0]-last[0],p[1]-last[1])<0.5)continue;p.push(wOf(ev,last[2]));seg(ctx,last,p,p[2]);s.pts.push(p);}
@@ -148,8 +153,12 @@ function setupInk(st){
     if(pr&&pr.length){let last=s.pts[s.pts.length-1];const w=last[2];let x0=last[0],y0=last[1],x1=x0,y1=y0;
       for(const ev of pr.slice(0,3)){const p=pos(ev);seg(ctx2,last,p,w);x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);last=p;}
       predBox=[x0-w,y0-w,x1+w,y1+w];}};
-  const endStroke=e=>{const s=st.ink.cur;if(!s||e.pointerId!==s.id)return;clearPred();st.ink.strokes.push(s);st.ink.cur=null;};
+  const endStroke=e=>{const s=st.ink.cur;if(!s||e.pointerId!==s.id)return;finish();};
   c.onpointerup=endStroke;c.onpointercancel=endStroke;c.onlostpointercapture=endStroke;
+  c.oncontextmenu=e=>e.preventDefault(); // 길게 누를 때 뜨는 메뉴/선택 차단
+  // 캔버스 밖에서 펜을 떼거나 취소돼도 획을 마무리
+  const docEnd=e=>{if(!document.body.contains(c)){document.removeEventListener('pointerup',docEnd,true);document.removeEventListener('pointercancel',docEnd,true);return;}endStroke(e);};
+  document.addEventListener('pointerup',docEnd,true);document.addEventListener('pointercancel',docEnd,true);
   document.getElementById('sh-undo').onpointerdown=e=>{e.preventDefault();e.stopPropagation();if(st.phase!=='solving')return;const s=st.ink.strokes.pop();if(!s)return;if(s.row!==null){st.strokes[s.row]=Math.max(0,st.strokes[s.row]-1);}redraw();};
   st.ink.redraw=redraw;
   // 펜 기기: 푸는 동안 손가락(손바닥) 스크롤 차단. 화면을 떠나면 스스로 해제
@@ -158,7 +167,7 @@ function setupInk(st){
   document.addEventListener('touchmove',blockScroll,{passive:false});
   document.body.classList.add('inking');
   const obs=new MutationObserver(()=>{if(!document.body.contains(c)){document.body.classList.remove('inking');obs.disconnect();}});obs.observe(app(),{childList:true});
-  st.ink.stop=()=>{document.body.classList.remove('inking');document.removeEventListener('touchmove',blockScroll);};
+  st.ink.stop=()=>{finish();document.body.classList.remove('inking');document.removeEventListener('touchmove',blockScroll);document.removeEventListener('pointerup',docEnd,true);document.removeEventListener('pointercancel',docEnd,true);};
 }
 function enterGrading(st){
   const e=document.getElementById('sh-end');e.style.display='none';
