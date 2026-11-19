@@ -72,7 +72,7 @@ function screenSheet(typeId,count){
     <div class="prog"><span>${t.name} · ${count}문제</span><span class="sub" style="margin:0">S ${dec((t.sec[0]*count).toFixed(0))}초</span>
       <span><button class="back" id="quit" style="padding:0;font-size:14px">나가기</button></span></div>
     <button class="btn primary big center" id="sh-start" style="margin-top:6px">시작 ▶</button>
-    <div class="sh-grid cols${cols}" id="sh-grid" style="grid-template-rows:repeat(${rows},auto)">
+    <div class="sh-grid cols${cols} t-${typeId}" id="sh-grid" style="grid-template-rows:repeat(${rows},auto)">
       ${probs.map((p,i)=>`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><canvas></canvas><div class="sh-ans"></div></div></div>`).join('')}
     </div>
     <button class="btn big center" id="sh-end" disabled style="opacity:.4">끝 ■</button>
@@ -82,7 +82,7 @@ function screenSheet(typeId,count){
   document.getElementById('quit').onclick=()=>{if(st.phase!=='solving'||confirm('푸는 중인 세트를 버릴까요?'))go(screenSheetMenu);};
   document.getElementById('sh-start').onclick=()=>{
     st.started=true;st.start=performance.now();st.phase='solving';
-    probs.forEach((p,i)=>{document.getElementById('q'+i).innerHTML=p.html||p.text;});
+    probs.forEach((p,i)=>{const q=document.getElementById('q'+i);q.innerHTML=p.html||p.text;if(!p.html&&p.text.length>11)q.classList.add('long');});
     document.getElementById('sh-start').style.display='none';
     const e=document.getElementById('sh-end');e.disabled=false;e.style.opacity='1';e.classList.add('primary');
     document.getElementById('sh-hint').textContent='다 풀면 "끝"을 펜으로 톡';
