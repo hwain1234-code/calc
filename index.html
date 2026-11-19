@@ -180,6 +180,26 @@
   .pch button.no{background:var(--red);color:#fff;border-color:var(--red)}
   .pch button:disabled,.oxb button:disabled{cursor:default}
   .pad{width:100%;display:block;background:#15161b;border:1px dashed var(--line);border-radius:12px;margin-top:8px;touch-action:none}
+  /* ===== 답안지 연습 ===== */
+  .sh-grid{display:grid;grid-auto-flow:column;column-gap:14px;margin:8px 0 10px;background:var(--card);border-radius:14px;padding:6px 8px;border:1px solid rgba(255,255,255,.05)}
+  .sh-grid.cols1{grid-template-columns:1fr}
+  .sh-grid.cols2{grid-template-columns:1fr 1fr}
+  .sh-row{display:flex;align-items:center;gap:6px;padding:3px 2px;border-bottom:1px dashed var(--line);min-height:54px}
+  .sh-n{flex:none;width:18px;font-size:11px;color:var(--sub);text-align:right}
+  .sh-q{flex:1;min-width:0;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.3px;white-space:nowrap;display:flex;align-items:center;gap:4px}
+  .sh-q .ph{color:var(--line);letter-spacing:2px}
+  .sh-q .frac{font-size:13px;line-height:1.05}
+  .sh-q .frac .d{border-top-width:2px}
+  .sh-q .sh-sq{color:var(--yellow);font-size:16px;margin:0 2px}
+  .sh-q .sh-small{font-size:13px;letter-spacing:0}
+  .sh-box{flex:none;width:112px;height:48px;position:relative;background:#101117;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .sh-box canvas{width:100%;height:100%;display:block;touch-action:none}
+  .sh-ans{position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--green);font-weight:800;font-size:15px;pointer-events:none;background:rgba(16,17,23,.75);padding:0 3px;border-radius:4px;font-variant-numeric:tabular-nums}
+  .sh-row.wrong .sh-box{border-color:var(--red);background:rgba(255,69,58,.14)}
+  .sh-row.wrong .sh-ans{color:var(--red)}
+  .sh-row.wrong .sh-n::after{content:' ✕';color:var(--red)}
+  .sh-row.none .sh-ans::before{content:'미작성 · ';font-size:11px;color:var(--sub)}
+  @media (max-width:420px){ .sh-q{font-size:17px} .sh-box{width:96px;height:44px} .sh-grid.cols2{grid-template-columns:1fr;grid-auto-flow:row} }
   #pq .ctab{font-size:14px}
   #pq .ctab th,#pq .ctab td{padding:7px 6px}
 </style>
@@ -189,6 +209,7 @@
 <div class="toast" id="toast"></div>
 <script src="concepts.js"></script>
 <script src="practice.js"></script>
+<script src="sheet.js"></script>
 <script>
 /* ================= 데이터: 문제 유형 정의 ================= */
 // sec: [S,A,B,C] — 문제 1개당 목표시간(초). D는 C 초과. (교재 등급표 비례환산)
@@ -295,8 +316,9 @@ function screenHome(){
       <div class="stat b"><div class="n">${solvedToday}</div><div class="l">오늘 푼 문제</div></div>
       <div class="stat p"><div class="n">${d.totalSolved||0}</div><div class="l">누적 문제</div></div>
     </div>
-    <div class="sec-title">암산 훈련</div>
-    <button class="btn primary big" id="m1"><div class="t"><span class="ic">🎯</span>스킬 드릴</div><div class="d">분수 비교 · 곱셈 비교 한 유형씩 집중 반복</div></button>
+    <div class="sec-title">계산 훈련</div>
+    <button class="btn primary big" id="m7"><div class="t"><span class="ic">📝</span>답안지 연습</div><div class="d">책 세트 그대로 펜슬로 쓰고 자가채점 · 13유형 · S 기준 시간</div></button>
+    <button class="btn big" id="m1"><div class="t"><span class="ic y">🎯</span>스킬 드릴</div><div class="d">분수 비교 · 곱셈 비교 한 문제씩 버튼으로</div></button>
     <button class="btn big" id="m2"><div class="t"><span class="ic b">🔀</span>복합 훈련</div><div class="d">분수·곱셈 비교를 섞은 실전 세트</div></button>
     <button class="btn big" id="m3"><div class="t"><span class="ic g">📈</span>기록실</div><div class="d">유형별 최고기록·성장그래프</div></button>
     <div class="sec-title">개념 공부</div>
@@ -306,6 +328,7 @@ function screenHome(){
     <div class="hint">💡 사파리/크롬 메뉴 → "홈 화면에 추가"하면 앱처럼 실행됩니다.</div>
   `;
   document.getElementById('m6').onclick=()=>go(screenSync);
+  document.getElementById('m7').onclick=()=>go(screenSheetMenu);
   document.getElementById('m1').onclick=()=>go(screenDrillMenu);
   document.getElementById('m2').onclick=()=>go(screenComplexMenu);
   document.getElementById('m3').onclick=()=>go(()=>screenRecords());
@@ -842,8 +865,8 @@ function screenResult(rec,g,isPB,prevBest,wrong,meta,early){
 /* ================= 기록실 ================= */
 function screenRecords(focusId){
   const d=db();
-  const ids=Object.keys(d.records).filter(k=>d.records[k].length&&(TYPE(k)||k.startsWith('complex_'))); // 삭제된 유형 기록은 숨김
-  const label=k=>k.startsWith('complex_')?'복합 훈련':(TYPE(k)?.name||k);
+  const ids=Object.keys(d.records).filter(k=>d.records[k].length&&(TYPE(k)||SHEET_TYPE(k)||k.startsWith('complex_')));
+  const label=k=>k.startsWith('complex_')?'복합 훈련':(TYPE(k)?.name||SHEET_TYPE(k)?.name||k);
   if(!ids.length){
     app().innerHTML=`<button class="back" id="bk">‹ 홈</button><h1>기록실</h1><div class="muted" style="margin-top:40px">아직 기록이 없어요.<br>스킬 드릴을 한 번 풀어보세요!</div>`;
     document.getElementById('bk').onclick=()=>go(screenHome);return;
