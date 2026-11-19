@@ -70,14 +70,13 @@ function screenSheet(typeId,count){
   const cols=count>=20?2:1;const rows=Math.ceil(count/cols);
   app().innerHTML=`
     <div class="prog"><span>${t.name} · ${count}문제</span><span class="sub" style="margin:0">S ${dec((t.sec[0]*count).toFixed(0))}초</span>
-      <span><button class="back" id="quit" style="padding:0;font-size:14px">나가기</button></span></div>
+      <span style="display:flex;gap:14px;align-items:center"><button class="sh-undo" id="sh-undo" title="마지막 획 지우기" style="display:none">↶ 지우기</button><button class="back" id="quit" style="padding:0;font-size:14px">나가기</button></span></div>
     <button class="btn primary big center" id="sh-start" style="margin-top:6px">시작 ▶</button>
     <div class="sh-wrap" id="sh-wrap">
     <div class="sh-grid cols${cols} t-${typeId}" id="sh-grid" style="grid-template-rows:repeat(${rows},auto)">
       ${probs.map((p,i)=>`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><div class="sh-ans"></div></div></div>`).join('')}
     </div>
     <canvas id="sh-ink"></canvas>
-    <button class="sh-undo" id="sh-undo" title="마지막 획 지우기">↶</button>
     </div>
     <button class="btn big center" id="sh-end" disabled style="opacity:.4">끝 ■</button>
     <div class="row" id="sh-after" style="display:none"><button class="btn primary center" id="sh-confirm">채점 확정 ✔</button><button class="btn center" id="sh-again">다시 ↻</button></div>
@@ -91,6 +90,7 @@ function screenSheet(typeId,count){
     const e=document.getElementById('sh-end');e.disabled=false;e.style.opacity='1';e.classList.add('primary');
     document.getElementById('sh-hint').textContent='다 풀면 "끝"을 펜으로 톡';
     document.getElementById('sh-wrap').classList.add('solving');
+    document.getElementById('sh-undo').style.display='';
     setupInk(st);
   };
   document.getElementById('sh-end').onpointerdown=ev=>{ev.preventDefault();if(st.phase!=='solving')return;st.end=performance.now();st.phase='grading';enterGrading(st);};
@@ -119,7 +119,7 @@ function setupInk(st){
     if(i!==null){if(st.first[i]===null)st.first[i]=performance.now();st.strokes[i]++;}
     st.ink.cur={row:i,pts:[p],w:width(e)};ctx.lineWidth=st.ink.cur.w;ctx.beginPath();ctx.arc(p[0],p[1],st.ink.cur.w/2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();};
   c.onpointermove=e=>{const s=st.ink.cur;if(!s)return;e.preventDefault();
-    const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+    let evs=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!evs||!evs.length)evs=[e];
     for(const ev of evs){const p=pos(ev);const last=s.pts[s.pts.length-1];if(Math.hypot(p[0]-last[0],p[1]-last[1])<0.7)continue;drawSeg(last,p,s.w);s.pts.push(p);}};
   c.onpointerup=c.onpointercancel=e=>{const s=st.ink.cur;if(!s)return;st.ink.strokes.push(s);st.ink.cur=null;};
   const redraw=()=>{ctx.clearRect(0,0,W,H);for(const s of st.ink.strokes){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.pts[0][0],s.pts[0][1],s.w/2,0,Math.PI*2);ctx.fill();for(let k=1;k<s.pts.length;k++)drawSeg(s.pts[k-1],s.pts[k],s.w);}};
@@ -129,6 +129,7 @@ function setupInk(st){
 function enterGrading(st){
   const e=document.getElementById('sh-end');e.style.display='none';
   document.getElementById('sh-wrap').classList.add('grading'); // 필기 면은 보이되 터치는 줄로 통과
+  document.getElementById('sh-undo').style.display='none';
   document.getElementById('sh-after').style.display='';
   document.getElementById('sh-hint').innerHTML=`걸린 시간 <b>${fmt(st.end-st.start)}</b> · 틀린 칸을 톡 쳐서 표시한 뒤 "채점 확정"`;
   app().querySelectorAll('.sh-row').forEach(row=>{
