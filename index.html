@@ -209,8 +209,11 @@
   .sh-box{flex:none;width:150px;height:60px;position:relative;background:#101117;border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .sh-grid.cols1 .sh-box{width:190px;height:66px}
   .sh-wrap{position:relative}
-  #sh-ink{position:absolute;left:0;top:0;z-index:2;touch-action:none;cursor:crosshair}
+  #sh-ink{position:absolute;left:0;top:0;z-index:2;touch-action:none;cursor:crosshair;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+  #sh-ink2{position:absolute;left:0;top:0;z-index:3;pointer-events:none}
+  #sh-end{position:relative;z-index:4}
   .sh-wrap.grading #sh-ink{pointer-events:none}
+  body.inking{overscroll-behavior:none;-webkit-touch-callout:none}
   .sh-undo{background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:5px 10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;touch-action:manipulation}
   .sh-wrap:not(.solving) #sh-ink{pointer-events:none}
   .sh-ans{position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--green);font-weight:800;font-size:15px;pointer-events:none;background:rgba(16,17,23,.75);padding:0 3px;border-radius:4px;font-variant-numeric:tabular-nums}

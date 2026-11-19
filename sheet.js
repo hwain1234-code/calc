@@ -7,9 +7,11 @@
 const sq=(text,answer)=>({text,answer});
 function sAdd2(){const a=CR(10,99),b=CR(10,99);return sq(`${a} + ${b} =`,a+b);}
 function sSub2(){let a=CR(10,99),b=CR(10,99);if(b>a)[a,b]=[b,a];return sq(`${a} − ${b} =`,a-b);}
-function sAddSub2(){return Math.random()<.5?sAdd2():sSub2();}
+function sAddSub2(kind){return (kind===undefined?Math.random()<.5:kind===0)?sAdd2():sSub2();}
 function sAdd4(){const a=CR(1000,9999),b=CR(1000,9999);return sq(`${a} + ${b} =`,a+b);}
 function sSub4(){let a=CR(1000,9999),b=CR(1000,9999);if(b>a)[a,b]=[b,a];return sq(`${a} − ${b} =`,a-b);}
+/* kind: 0=덧셈 1=뺄셈 (세트 안에서 반반 섞어 배치). 없으면 무작위 */
+function sAddSub4(kind){return (kind===undefined?Math.random()<.5:kind===0)?sAdd4():sSub4();}
 function sMultiAdd(){const n=[0,0,0,0,0].map(()=>CR(10,99));return sq(n.join('+')+' =',n.reduce((x,y)=>x+y,0));}
 function sMul2x1(){const a=CR(11,99),b=CR(2,9);return sq(`${a} × ${b} =`,a*b);}
 function sMul3x1(){const a=CR(100,999),b=CR(2,9);return sq(`${a} × ${b} =`,a*b);}
@@ -22,9 +24,9 @@ function sFrac(){const p=fFracCmp();return {html:`${frac(p.left.n,p.left.d)}<spa
 function sMulCmp(){const p=fMulCmp();return {html:`<span class="sh-small">${dec(p.left.a)}×${dec(p.left.b)}</span><span class="sh-sq">□</span><span class="sh-small">${dec(p.right.c)}×${dec(p.right.d)}</span>`,text:`${p.left.a}×${p.left.b} □ ${p.right.c}×${p.right.d}`,answer:p.answer,cmp:true};}
 
 const SHEET_TYPES=[
-  {id:'addsub2',part:1,name:'두 자리 덧셈·뺄셈',ex:'36 + 55 / 53 − 31',gen:sAddSub2,sec:[1.75,2,2.25,2.5]},
-  {id:'add4',part:1,name:'네 자리 덧셈',ex:'3666 + 2768',gen:sAdd4,sec:[3.75,4.4,5,5.6]},
-  {id:'sub4',part:1,name:'네 자리 뺄셈',ex:'7851 − 3399',gen:sSub4,sec:[5.6,6.25,6.9,7.5]},
+  {id:'addsub2',part:1,name:'두 자리 덧셈·뺄셈',ex:'36 + 55 / 53 − 31',gen:sAddSub2,mix:true,sec:[1.75,2,2.25,2.5]},
+  // 덧셈(3.75/4.4/5/5.6)과 뺄셈(5.6/6.25/6.9/7.5) 기준의 평균. 세트는 덧셈·뺄셈 반반
+  {id:'addsub4',part:1,name:'네 자리 덧셈·뺄셈',ex:'3666 + 2768 / 7851 − 3399',gen:sAddSub4,mix:true,sec:[4.7,5.3,5.95,6.55]},
   {id:'multiadd',part:1,name:'여러 수 덧셈',ex:'41+35+29+33+31',gen:sMultiAdd,sec:[7.5,8.3,9.2,10]},
   {id:'mul2x1',part:1,name:'두 자리 × 한 자리',ex:'98 × 6',gen:sMul2x1,sec:[1.75,2,2.25,2.5]},
   {id:'mul3x1',part:1,name:'세 자리 × 한 자리',ex:'381 × 7',gen:sMul3x1,sec:[9,10,11,12]},
@@ -36,7 +38,8 @@ const SHEET_TYPES=[
   {id:'fraccmp',part:2,name:'분수 비교',ex:'33/46 □ 41/46',gen:sFrac,sec:[7,10,12,15]},
   {id:'mulcmp',part:2,name:'곱셈 비교',ex:'7300×30.8 □ 8600×25.4',gen:sMulCmp,sec:[10,13,16,20]},
 ];
-const SHEET_TYPE=id=>SHEET_TYPES.find(t=>t.id===id);
+const SHEET_ALIAS={add4:'addsub4',sub4:'addsub4'}; // 예전 기록의 유형 id
+const SHEET_TYPE=id=>SHEET_TYPES.find(t=>t.id===(SHEET_ALIAS[id]||id));
 const gradeBySec=(secArr,count,elapsed)=>{const th=secArr.map(s=>s*count);return elapsed<=th[0]?'S':elapsed<=th[1]?'A':elapsed<=th[2]?'B':elapsed<=th[3]?'C':'D';};
 
 /* ---------- 메뉴 ---------- */
@@ -64,19 +67,20 @@ function screenSheetMenu(){
 /* ---------- 답안지 ---------- */
 function screenSheet(typeId,count){
   const t=SHEET_TYPE(typeId);
-  const probs=[];for(let i=0;i<count;i++)probs.push(t.gen());
+  const kinds=t.mix?cshuffle(Array.from({length:count},(_,i)=>i%2)):null;
+  const probs=[];for(let i=0;i<count;i++)probs.push(t.gen(kinds?kinds[i]:undefined));
   const st={typeId,count,probs,started:false,start:0,end:0,first:Array(count).fill(null),strokes:Array(count).fill(0),wrong:Array(count).fill(false),phase:'ready'};
   S.sheet=st;
   const cols=count>=20?2:1;const rows=Math.ceil(count/cols);
   app().innerHTML=`
-    <div class="prog"><span>${t.name} · ${count}문제</span><span class="sub" style="margin:0">S ${dec((t.sec[0]*count).toFixed(0))}초</span>
+    <div class="prog" style="position:relative;z-index:3"><span>${t.name} · ${count}문제</span><span class="sub" style="margin:0">S ${dec((t.sec[0]*count).toFixed(0))}초</span>
       <span style="display:flex;gap:14px;align-items:center"><button class="sh-undo" id="sh-undo" title="마지막 획 지우기" style="display:none">↶ 지우기</button><button class="back" id="quit" style="padding:0;font-size:14px">나가기</button></span></div>
     <button class="btn primary big center" id="sh-start" style="margin-top:6px">시작 ▶</button>
     <div class="sh-wrap" id="sh-wrap">
     <div class="sh-grid cols${cols} t-${typeId}" id="sh-grid" style="grid-template-rows:repeat(${rows},auto)">
       ${probs.map((p,i)=>`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><div class="sh-ans"></div></div></div>`).join('')}
     </div>
-    <canvas id="sh-ink"></canvas>
+    <canvas id="sh-ink"></canvas><canvas id="sh-ink2"></canvas>
     </div>
     <button class="btn big center" id="sh-end" disabled style="opacity:.4">끝 ■</button>
     <div class="row" id="sh-after" style="display:none"><button class="btn primary center" id="sh-confirm">채점 확정 ✔</button><button class="btn center" id="sh-again">다시 ↻</button></div>
@@ -97,38 +101,69 @@ function screenSheet(typeId,count){
   document.getElementById('sh-again').onclick=()=>go(()=>screenSheet(typeId,count));
   document.getElementById('sh-confirm').onclick=()=>finishSheet(st);
 }
-/* 답안지 전체를 덮는 필기 면. 종이처럼 아무 데나 쓰고, 첫 획이 어느 문제 줄 위에서 시작됐는지로 시간을 잰다. */
+/* 답안지 전체를 덮는 필기 면. 종이처럼 아무 데나 쓰고, 첫 획이 어느 문제 줄 위에서 시작됐는지로 시간을 잰다.
+   - 캔버스는 답안지보다 사방으로 조금 크게 잡아, 칸 가장자리 바깥에서 시작한 획도 받는다
+   - 포인터별 추적: 손바닥(touch)과 펜(pen)이 섞여도 펜 획에 손바닥 좌표가 끼어들지 않음
+   - 압력에 따라 점마다 굵기 변화, 합쳐진(coalesced) 좌표 모두 사용, 예측(predicted) 좌표는 겉면 캔버스에 미리 그려 지연감 완화
+   - 펜이 감지된 기기에서는 푸는 동안 손가락 스크롤을 막아, 손바닥으로 화면이 밀리며 펜 입력이 취소(pointercancel)되는 것을 방지 */
+const INK_PAD={x:14,y:26};
 function setupInk(st){
-  const wrap=document.getElementById('sh-wrap'),c=document.getElementById('sh-ink');
-  const dpr=window.devicePixelRatio||1;
-  const W=wrap.clientWidth,H=wrap.clientHeight;c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';
-  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fff';
-  const wr=wrap.getBoundingClientRect();
-  // 줄 영역(래퍼 기준 좌표) 캐시 → 히트테스트
-  const rows=[...wrap.querySelectorAll('.sh-row')].map(r=>{const b=r.getBoundingClientRect();const k=W/wr.width;return {i:+r.dataset.i,x:(b.left-wr.left)*k,y:(b.top-wr.top)*k,w:b.width*k,h:b.height*k};});
+  const wrap=document.getElementById('sh-wrap'),c=document.getElementById('sh-ink'),c2=document.getElementById('sh-ink2');
+  const dpr=Math.min(window.devicePixelRatio||1,3);
+  const W=wrap.clientWidth+INK_PAD.x*2,H=wrap.clientHeight+INK_PAD.y*2;
+  for(const cv of [c,c2]){cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';cv.style.left=-INK_PAD.x+'px';cv.style.top=-INK_PAD.y+'px';}
+  const ctx=c.getContext('2d',{desynchronized:true})||c.getContext('2d');ctx.scale(dpr,dpr);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fff';ctx.fillStyle='#fff';
+  const ctx2=c2.getContext('2d',{desynchronized:true})||c2.getContext('2d');ctx2.scale(dpr,dpr);ctx2.lineCap='round';ctx2.lineJoin='round';ctx2.strokeStyle='rgba(255,255,255,.85)';
+  const cr=c.getBoundingClientRect();const k0=W/cr.width;
+  // 줄 영역(캔버스 기준 좌표) 캐시 → 히트테스트
+  const rows=[...wrap.querySelectorAll('.sh-row')].map(r=>{const b=r.getBoundingClientRect();return {i:+r.dataset.i,x:(b.left-cr.left)*k0,y:(b.top-cr.top)*k0,w:b.width*k0,h:b.height*k0};});
   const hit=(x,y)=>{let best=null,bd=1e9;for(const r of rows){const inside=x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h;if(inside)return r.i;const dx=x<r.x?r.x-x:x>r.x+r.w?x-r.x-r.w:0,dy=y<r.y?r.y-y:y>r.y+r.h?y-r.y-r.h:0;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=r.i;}}return best;};
-  const pos=e=>{const r=c.getBoundingClientRect();const k=W/r.width;return [(e.clientX-r.left)*k,(e.clientY-r.top)*k];};
+  let rect=cr;const pos=e=>{const k=W/rect.width;return [(e.clientX-rect.left)*k,(e.clientY-rect.top)*k];};
   st.ink={strokes:[],cur:null};
   const penSeen=()=>S.penSeen||localStorage.getItem('psatcalc_pen')==='1';
   const allow=e=>{if(e.pointerType==='pen'){if(!S.penSeen){S.penSeen=true;try{localStorage.setItem('psatcalc_pen','1')}catch(_){}}return true;}
     if(e.pointerType==='touch'){if(S.pr&&S.pr.pen)return false;if(penSeen())return false;return true;} return true;};
-  const width=e=>e.pointerType==='pen'?1.6+2.6*(e.pressure||0.5):2.6;
-  const drawSeg=(a,b,w)=>{ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(a[0],a[1]);const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;ctx.quadraticCurveTo(a[0],a[1],mx,my);ctx.lineTo(b[0],b[1]);ctx.stroke();};
-  c.onpointerdown=e=>{if(st.phase!=='solving'||!allow(e))return;e.preventDefault();c.setPointerCapture(e.pointerId);
+  const wOf=(e,prev)=>{let w=e.pointerType==='pen'?1.7+3.0*Math.min(1,(e.pressure||0.4)*1.25):2.8;if(prev!=null)w=prev*0.6+w*0.4;return w;};
+  const seg=(g,a,b,w)=>{g.lineWidth=w;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();};
+  const dot=(g,p,w)=>{g.beginPath();g.arc(p[0],p[1],w/2,0,Math.PI*2);g.fill();};
+  let predBox=null;const clearPred=()=>{if(predBox){ctx2.clearRect(predBox[0]-6,predBox[1]-6,predBox[2]-predBox[0]+12,predBox[3]-predBox[1]+12);predBox=null;}};
+  const redraw=()=>{ctx.clearRect(0,0,W,H);for(const s of st.ink.strokes){dot(ctx,s.pts[0],s.pts[0][2]);for(let k=1;k<s.pts.length;k++)seg(ctx,s.pts[k-1],s.pts[k],s.pts[k][2]);}};
+  c.onpointerdown=e=>{if(st.phase!=='solving'||!allow(e))return;e.preventDefault();
+    rect=c.getBoundingClientRect();
+    const cur=st.ink.cur;
+    if(cur){ // 다른 포인터가 그리는 중: 펜이 들어오면 손가락 획은 버린다(손바닥). 펜이 그리는 중이면 손가락은 무시
+      if(e.pointerType==='pen'&&cur.type!=='pen'){st.ink.cur=null;if(cur.row!==null)st.strokes[cur.row]=Math.max(0,st.strokes[cur.row]-1);redraw();}
+      else return;}
+    try{c.setPointerCapture(e.pointerId);}catch(_){}
     const p=pos(e);const i=hit(p[0],p[1]);
     if(i!==null){if(st.first[i]===null)st.first[i]=performance.now();st.strokes[i]++;}
-    st.ink.cur={row:i,pts:[p],w:width(e)};ctx.lineWidth=st.ink.cur.w;ctx.beginPath();ctx.arc(p[0],p[1],st.ink.cur.w/2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();};
-  c.onpointermove=e=>{const s=st.ink.cur;if(!s)return;e.preventDefault();
+    const w=wOf(e);p.push(w);
+    st.ink.cur={id:e.pointerId,type:e.pointerType,row:i,pts:[p]};dot(ctx,p,w);};
+  c.onpointermove=e=>{const s=st.ink.cur;if(!s||e.pointerId!==s.id)return;e.preventDefault();
     let evs=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!evs||!evs.length)evs=[e];
-    for(const ev of evs){const p=pos(ev);const last=s.pts[s.pts.length-1];if(Math.hypot(p[0]-last[0],p[1]-last[1])<0.7)continue;drawSeg(last,p,s.w);s.pts.push(p);}};
-  c.onpointerup=c.onpointercancel=e=>{const s=st.ink.cur;if(!s)return;st.ink.strokes.push(s);st.ink.cur=null;};
-  const redraw=()=>{ctx.clearRect(0,0,W,H);for(const s of st.ink.strokes){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.pts[0][0],s.pts[0][1],s.w/2,0,Math.PI*2);ctx.fill();for(let k=1;k<s.pts.length;k++)drawSeg(s.pts[k-1],s.pts[k],s.w);}};
+    clearPred();
+    for(const ev of evs){const p=pos(ev);let last=s.pts[s.pts.length-1];if(Math.hypot(p[0]-last[0],p[1]-last[1])<0.5)continue;p.push(wOf(ev,last[2]));seg(ctx,last,p,p[2]);s.pts.push(p);}
+    // 예측 좌표(있으면)를 겉면에 미리 그려 펜 끝을 따라오는 느낌을 줄인다
+    const pr=e.getPredictedEvents?e.getPredictedEvents():null;
+    if(pr&&pr.length){let last=s.pts[s.pts.length-1];const w=last[2];let x0=last[0],y0=last[1],x1=x0,y1=y0;
+      for(const ev of pr.slice(0,3)){const p=pos(ev);seg(ctx2,last,p,w);x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);last=p;}
+      predBox=[x0-w,y0-w,x1+w,y1+w];}};
+  const endStroke=e=>{const s=st.ink.cur;if(!s||e.pointerId!==s.id)return;clearPred();st.ink.strokes.push(s);st.ink.cur=null;};
+  c.onpointerup=endStroke;c.onpointercancel=endStroke;c.onlostpointercapture=endStroke;
   document.getElementById('sh-undo').onpointerdown=e=>{e.preventDefault();e.stopPropagation();if(st.phase!=='solving')return;const s=st.ink.strokes.pop();if(!s)return;if(s.row!==null){st.strokes[s.row]=Math.max(0,st.strokes[s.row]-1);}redraw();};
   st.ink.redraw=redraw;
+  // 펜 기기: 푸는 동안 손가락(손바닥) 스크롤 차단. 화면을 떠나면 스스로 해제
+  const blockScroll=ev=>{if(!document.body.contains(c)){document.removeEventListener('touchmove',blockScroll);return;}
+    if(st.phase==='solving'&&penSeen()&&ev.cancelable)ev.preventDefault();};
+  document.addEventListener('touchmove',blockScroll,{passive:false});
+  document.body.classList.add('inking');
+  const obs=new MutationObserver(()=>{if(!document.body.contains(c)){document.body.classList.remove('inking');obs.disconnect();}});obs.observe(app(),{childList:true});
+  st.ink.stop=()=>{document.body.classList.remove('inking');document.removeEventListener('touchmove',blockScroll);};
 }
 function enterGrading(st){
   const e=document.getElementById('sh-end');e.style.display='none';
   document.getElementById('sh-wrap').classList.add('grading'); // 필기 면은 보이되 터치는 줄로 통과
+  if(st.ink&&st.ink.stop)st.ink.stop();
   document.getElementById('sh-undo').style.display='none';
   document.getElementById('sh-after').style.display='';
   document.getElementById('sh-hint').innerHTML=`걸린 시간 <b>${fmt(st.end-st.start)}</b> · 틀린 칸을 톡 쳐서 표시한 뒤 "채점 확정"`;
