@@ -191,12 +191,14 @@
   .sh-grid.cols2.t-mul4x1 .sh-box{width:140px}
   .sh-grid.cols2.t-mulx5 .sh-box{width:132px}
   .sh-grid.cols2.t-multiadd .sh-box{width:116px}
-  /* 비교 유형은 답이 < 또는 > 하나라 칸이 좁아도 됨 → 문제 글자에 폭을 양보 */
-  .sh-grid.cols2.t-fraccmp .sh-box{width:96px}
-  .sh-grid.cols2.t-mulcmp .sh-box{width:84px}
+  /* 비교 유형: 왼쪽 식 · [답 칸] · 오른쪽 식. 답(< 또는 >)을 가운데 칸에 쓴다 */
+  .sh-row.cmp .sh-q.cl{justify-content:flex-end}
+  .sh-row.cmp .sh-q.cr{justify-content:flex-start}
+  .sh-grid .sh-box.mid,.sh-grid.cols2 .sh-box.mid{width:66px;height:58px;flex:none}
+  .sh-grid.cols1 .sh-box.mid{width:80px;height:64px}
+  .sh-box.mid .sh-ans{right:auto;left:50%;transform:translate(-50%,-50%);font-size:22px;padding:0 6px}
+  .sh-row.cmp.none .sh-ans::before{content:'빈칸 ';font-size:10px}
   .sh-grid.t-mulcmp .sh-small{font-size:12.5px}
-  .sh-grid.t-mulcmp .sh-sq{display:none}
-  .sh-grid.t-mulcmp .sh-q{gap:8px}
   .sh-row{display:flex;align-items:center;gap:6px;padding:3px 2px;border-bottom:1px dashed var(--line);min-height:66px}
   .sh-n{flex:none;width:18px;font-size:11px;color:var(--sub);text-align:right}
   .sh-q{flex:1;min-width:0;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap;display:flex;align-items:center;gap:4px}
@@ -221,7 +223,7 @@
   .sh-row.wrong .sh-ans{color:var(--red)}
   .sh-row.wrong .sh-n::after{content:' ✕';color:var(--red)}
   .sh-row.none .sh-ans::before{content:'미작성 · ';font-size:11px;color:var(--sub)}
-  @media (max-width:420px){ .sh-q{font-size:17px} .sh-box,.sh-grid.cols1 .sh-box{width:130px;height:54px} .sh-row{min-height:60px} .sh-grid.cols2{grid-template-columns:1fr;grid-auto-flow:row} }
+  @media (max-width:420px){ .sh-q{font-size:17px} .sh-box,.sh-grid.cols1 .sh-box{width:130px;height:54px} .sh-grid .sh-box.mid,.sh-grid.cols1 .sh-box.mid{width:60px;height:54px} .sh-row{min-height:60px} .sh-grid.cols2{grid-template-columns:1fr;grid-auto-flow:row} }
   #pq .ctab{font-size:14px}
   #pq .ctab th,#pq .ctab td{padding:7px 6px}
 </style>

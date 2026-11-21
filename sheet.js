@@ -20,8 +20,9 @@ function sMulX5(){const b=cpick([5,15,25]);const x=CR(24,196)*cpick([5,10,15,20]
 function sMul1019(){const a=CR(11,29),b=CR(11,29);return sq(`${a} × ${b} =`,a*b);}
 function sMul11(){if(Math.random()<.5){const a=CR(11,99);return sq(`${a} × 11 =`,a*11);}const t=CR(1,9),o=CR(1,9);const a=t*10+o,b=t*10+(10-o);return sq(`${a} × ${b} =`,a*b);}
 function sMul2x2(){const a=CR(11,99),b=CR(11,99);return sq(`${a} × ${b} =`,a*b);}
-function sFrac(){const p=fFracCmp();return {html:`${frac(p.left.n,p.left.d)}<span class="sh-sq">□</span>${frac(p.right.n,p.right.d)}`,text:`${p.left.n}/${p.left.d} □ ${p.right.n}/${p.right.d}`,answer:p.answer,cmp:true};}
-function sMulCmp(){const p=fMulCmp();return {html:`<span class="sh-small">${dec(p.left.a)}×${dec(p.left.b)}</span><span class="sh-sq">□</span><span class="sh-small">${dec(p.right.c)}×${dec(p.right.d)}</span>`,text:`${p.left.a}×${p.left.b} □ ${p.right.c}×${p.right.d}`,answer:p.answer,cmp:true};}
+/* 비교 유형: 답(< 또는 >)을 두 식 사이의 칸에 쓴다 → left/right 를 따로 둔다 */
+function sFrac(){const p=fFracCmp();return {left:frac(p.left.n,p.left.d),right:frac(p.right.n,p.right.d),text:`${p.left.n}/${p.left.d} □ ${p.right.n}/${p.right.d}`,answer:p.answer,cmp:true};}
+function sMulCmp(){const p=fMulCmp();return {left:`<span class="sh-small">${dec(p.left.a)}×${dec(p.left.b)}</span>`,right:`<span class="sh-small">${dec(p.right.c)}×${dec(p.right.d)}</span>`,text:`${p.left.a}×${p.left.b} □ ${p.right.c}×${p.right.d}`,answer:p.answer,cmp:true};}
 
 const SHEET_TYPES=[
   {id:'addsub2',part:1,name:'두 자리 덧셈·뺄셈',ex:'36 + 55 / 53 − 31',gen:sAddSub2,mix:true,sec:[1.75,2,2.25,2.5]},
@@ -78,7 +79,9 @@ function screenSheet(typeId,count){
     <button class="btn primary big center" id="sh-start" style="margin-top:6px">시작 ▶</button>
     <div class="sh-wrap" id="sh-wrap">
     <div class="sh-grid cols${cols} t-${typeId}" id="sh-grid" style="grid-template-rows:repeat(${rows},auto)">
-      ${probs.map((p,i)=>`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><div class="sh-ans"></div></div></div>`).join('')}
+      ${probs.map((p,i)=>p.cmp
+        ?`<div class="sh-row cmp" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q cl" id="q${i}L"><span class="ph">· ·</span></span><div class="sh-box mid"><div class="sh-ans"></div></div><span class="sh-q cr" id="q${i}R"><span class="ph">· ·</span></span></div>`
+        :`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><div class="sh-ans"></div></div></div>`).join('')}
     </div>
     <canvas id="sh-ink"></canvas><canvas id="sh-ink2"></canvas>
     </div>
@@ -89,7 +92,9 @@ function screenSheet(typeId,count){
   document.getElementById('quit').onclick=()=>{if(st.phase!=='solving'||confirm('푸는 중인 세트를 버릴까요?'))go(screenSheetMenu);};
   document.getElementById('sh-start').onclick=()=>{
     st.started=true;st.start=performance.now();st.phase='solving';
-    probs.forEach((p,i)=>{const q=document.getElementById('q'+i);q.innerHTML=p.html||p.text;if(!p.html&&p.text.length>11)q.classList.add('long');});
+    probs.forEach((p,i)=>{
+      if(p.cmp){document.getElementById('q'+i+'L').innerHTML=p.left;document.getElementById('q'+i+'R').innerHTML=p.right;return;}
+      const q=document.getElementById('q'+i);q.innerHTML=p.html||p.text;if(!p.html&&p.text.length>11)q.classList.add('long');});
     document.getElementById('sh-start').style.display='none';
     const e=document.getElementById('sh-end');e.disabled=false;e.style.opacity='1';e.classList.add('primary');
     document.getElementById('sh-hint').textContent='다 풀면 "끝"을 펜으로 톡';
