@@ -197,9 +197,18 @@
   .sh-grid .sh-row.cmp .sh-box.mid{flex:0 0 66px;width:66px;min-width:0;height:58px}
   .sh-grid.cols1 .sh-row.cmp .sh-box.mid{flex-basis:80px;width:80px;height:64px}
   .sh-box.mid .sh-ans{right:auto;left:50%;transform:translate(-50%,-50%);font-size:22px;padding:0 6px}
+  .sh-row.cmp .sh-ans{top:auto;bottom:3px;transform:translateX(-50%);font-size:15px;line-height:1.1;padding:0 5px}
   .sh-row.cmp.none .sh-ans::before{content:'빈칸 ';font-size:10px}
+  .sh-row.cmp .sh-q.win{color:var(--green)}
+  .sh-row.cmp.wrong .sh-q.win{color:var(--red)}
   .sh-grid.t-mulcmp .sh-small{font-size:16px}
-  .sh-row{display:flex;align-items:center;gap:6px;padding:3px 2px;border-bottom:1px dashed var(--line);min-height:66px}
+  .sh-row{position:relative;display:flex;align-items:center;gap:6px;padding:3px 2px;border-bottom:1px dashed var(--line);min-height:66px}
+  /* 채점: 정답은 문제 글자 아래 줄에(필기와 겹치지 않게) */
+  .sh-a{position:absolute;left:28px;bottom:3px;display:none;font-size:15px;font-weight:800;line-height:1;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .sh-wrap.grading .sh-a{display:block}
+  .sh-row.wrong .sh-a{color:var(--red)}
+  .sh-row.none .sh-a::before{content:'미작성 · ';font-size:11px;color:var(--sub);font-weight:600}
+  .sh-row:not(.cmp) .sh-ans{display:none}
   .sh-n{flex:none;width:20px;font-size:12px;color:var(--sub);text-align:right}
   .sh-q{flex:1 0 auto;min-width:0;font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap;display:flex;align-items:center;gap:4px}
   .sh-q.long{font-size:16px}
@@ -222,7 +231,6 @@
   .sh-row.wrong .sh-box{border-color:var(--red);background:rgba(255,69,58,.14)}
   .sh-row.wrong .sh-ans{color:var(--red)}
   .sh-row.wrong .sh-n::after{content:' ✕';color:var(--red)}
-  .sh-row.none .sh-ans::before{content:'미작성 · ';font-size:11px;color:var(--sub)}
   @media (max-width:420px){ .sh-q{font-size:20px} .sh-q.long{font-size:15px} .sh-box,.sh-grid.cols1 .sh-box{flex-basis:140px;height:56px} .sh-grid .sh-box.mid,.sh-grid.cols1 .sh-box.mid{width:60px;height:54px} .sh-row{min-height:60px} .sh-grid.cols2{grid-template-columns:1fr;grid-auto-flow:row} }
   #pq .ctab{font-size:14px}
   #pq .ctab th,#pq .ctab td{padding:7px 6px}

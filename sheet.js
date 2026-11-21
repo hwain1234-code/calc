@@ -81,7 +81,7 @@ function screenSheet(typeId,count){
     <div class="sh-grid cols${cols} t-${typeId}" id="sh-grid" style="grid-template-rows:repeat(${rows},auto)">
       ${probs.map((p,i)=>p.cmp
         ?`<div class="sh-row cmp" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q cl" id="q${i}L"><span class="ph">· ·</span></span><div class="sh-box mid"><div class="sh-ans"></div></div><span class="sh-q cr" id="q${i}R"><span class="ph">· ·</span></span></div>`
-        :`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><div class="sh-ans"></div></div></div>`).join('')}
+        :`<div class="sh-row" data-i="${i}"><span class="sh-n">${i+1}</span><span class="sh-q" id="q${i}"><span class="ph">·  ·  ·</span></span><div class="sh-box"><div class="sh-ans"></div></div><span class="sh-a"></span></div>`).join('')}
     </div>
     <canvas id="sh-ink"></canvas><canvas id="sh-ink2"></canvas>
     </div>
@@ -183,7 +183,9 @@ function enterGrading(st){
   document.getElementById('sh-hint').innerHTML=`걸린 시간 <b>${fmt(st.end-st.start)}</b> · 틀린 칸을 톡 쳐서 표시한 뒤 "채점 확정"`;
   app().querySelectorAll('.sh-row').forEach(row=>{
     const i=+row.dataset.i,p=st.probs[i];
-    row.querySelector('.sh-ans').textContent=p.cmp?p.answer:String(p.answer);
+    // 정답은 필기 위가 아니라 문제 글자 아래(일반) / 가운데 칸 아래쪽(비교)에 표시. 비교는 큰 쪽 식을 초록으로
+    if(p.cmp){row.querySelector('.sh-ans').textContent=p.answer;row.querySelector(p.answer==='>'?'.sh-q.cl':'.sh-q.cr').classList.add('win');}
+    else row.querySelector('.sh-a').textContent='= '+String(p.answer);
     if(st.strokes[i]===0){st.wrong[i]=true;row.classList.add('wrong','none');}
     row.onclick=()=>{st.wrong[i]=!st.wrong[i];row.classList.toggle('wrong',st.wrong[i]);};
   });
