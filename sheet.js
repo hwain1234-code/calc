@@ -94,7 +94,7 @@ function screenSheet(typeId,count){
     st.started=true;st.start=performance.now();st.phase='solving';
     probs.forEach((p,i)=>{
       if(p.cmp){document.getElementById('q'+i+'L').innerHTML=p.left;document.getElementById('q'+i+'R').innerHTML=p.right;return;}
-      const q=document.getElementById('q'+i);q.innerHTML=p.html||p.text;if(!p.html&&p.text.length>11)q.classList.add('long');});
+      const q=document.getElementById('q'+i);q.innerHTML=p.html||p.text.replace(/ /g,'\u2009');if(!p.html&&p.text.length>14)q.classList.add('long');}); // 표시용 공백은 얇은 공백
     document.getElementById('sh-start').style.display='none';
     const e=document.getElementById('sh-end');e.disabled=false;e.style.opacity='1';e.classList.add('primary');
     document.getElementById('sh-hint').textContent='다 풀면 "끝"을 펜으로 톡';

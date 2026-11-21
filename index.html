@@ -24,7 +24,7 @@
   }
   #app{max-width:520px; margin:0 auto; min-height:100%; padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px);}
   /* 태블릿·PC: 전체를 키우고 폭도 넓힘 (아이패드 세로 768px, 가로 1024px 기준) */
-  @media (min-width:700px){ body{zoom:1.15} #app{max-width:610px;padding-top:12px} }
+  @media (min-width:700px){ body{zoom:1.15} #app{max-width:640px;padding-top:12px} }
   @media (min-width:1000px){ body{zoom:1.35} #app{max-width:680px} }
   @media (min-width:1300px){ body{zoom:1.5} #app{max-width:760px} }
   h1{font-size:26px;font-weight:800;letter-spacing:-.5px;margin:18px 0 2px}
@@ -186,30 +186,30 @@
   .sh-grid.cols2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .sh-grid>.sh-row{min-width:0}
   .sh-q{overflow:hidden}
-  /* 문제 글자가 긴 유형은 칸을 조금 줄여 한 줄에 맞춤 (2열 기준) */
-  .sh-grid.cols2 .sh-box{width:146px}
-  .sh-grid.cols2.t-mul4x1 .sh-box{width:140px}
-  .sh-grid.cols2.t-mulx5 .sh-box{width:132px}
-  .sh-grid.cols2.t-multiadd .sh-box{width:116px}
+  /* 문제 글자는 제 폭을 다 차지하고(줄어들지 않음), 답 칸이 필요할 때만 min-width까지 양보한다 */
+  .sh-grid.cols2 .sh-box{flex-basis:146px}
+  .sh-grid.cols2.t-multiadd .sh-box{min-width:96px}
+  .sh-grid.cols2.t-multiadd .sh-q.long{font-size:16px}
   /* 비교 유형: 왼쪽 식 · [답 칸] · 오른쪽 식. 답(< 또는 >)을 가운데 칸에 쓴다 */
+  .sh-row.cmp .sh-q{flex:1 1 0}
   .sh-row.cmp .sh-q.cl{justify-content:flex-end}
   .sh-row.cmp .sh-q.cr{justify-content:flex-start}
-  .sh-grid .sh-box.mid,.sh-grid.cols2 .sh-box.mid{width:66px;height:58px;flex:none}
-  .sh-grid.cols1 .sh-box.mid{width:80px;height:64px}
+  .sh-grid .sh-row.cmp .sh-box.mid{flex:0 0 66px;width:66px;min-width:0;height:58px}
+  .sh-grid.cols1 .sh-row.cmp .sh-box.mid{flex-basis:80px;width:80px;height:64px}
   .sh-box.mid .sh-ans{right:auto;left:50%;transform:translate(-50%,-50%);font-size:22px;padding:0 6px}
   .sh-row.cmp.none .sh-ans::before{content:'빈칸 ';font-size:10px}
-  .sh-grid.t-mulcmp .sh-small{font-size:12.5px}
+  .sh-grid.t-mulcmp .sh-small{font-size:16px}
   .sh-row{display:flex;align-items:center;gap:6px;padding:3px 2px;border-bottom:1px dashed var(--line);min-height:66px}
-  .sh-n{flex:none;width:18px;font-size:11px;color:var(--sub);text-align:right}
-  .sh-q{flex:1;min-width:0;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap;display:flex;align-items:center;gap:4px}
-  .sh-q.long{font-size:12.5px}
+  .sh-n{flex:none;width:20px;font-size:12px;color:var(--sub);text-align:right}
+  .sh-q{flex:1 0 auto;min-width:0;font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap;display:flex;align-items:center;gap:4px}
+  .sh-q.long{font-size:16px}
   .sh-q .ph{color:var(--line);letter-spacing:2px}
-  .sh-q .frac{font-size:13px;line-height:1.05}
+  .sh-q .frac{font-size:19px;line-height:1.05}
   .sh-q .frac .d{border-top-width:2px}
   .sh-q .sh-sq{color:var(--yellow);font-size:16px;margin:0 2px}
   .sh-q .sh-small{font-size:13px;letter-spacing:0}
-  .sh-box{flex:none;width:150px;height:60px;position:relative;background:#101117;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  .sh-grid.cols1 .sh-box{width:190px;height:66px}
+  .sh-box{flex:0 1 150px;min-width:104px;height:60px;position:relative;background:#101117;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .sh-grid.cols1 .sh-box{flex-basis:190px;height:66px}
   .sh-wrap{position:relative;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
   #sh-ink{position:absolute;left:0;top:0;z-index:2;touch-action:none;cursor:crosshair;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
   #sh-ink2{position:absolute;left:0;top:0;z-index:3;pointer-events:none}
@@ -218,12 +218,12 @@
   body.inking{overscroll-behavior:none;-webkit-touch-callout:none}
   .sh-undo{background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:5px 10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;touch-action:manipulation}
   .sh-wrap:not(.solving) #sh-ink{pointer-events:none}
-  .sh-ans{position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--green);font-weight:800;font-size:15px;pointer-events:none;background:rgba(16,17,23,.75);padding:0 3px;border-radius:4px;font-variant-numeric:tabular-nums}
+  .sh-ans{position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--green);font-weight:800;font-size:18px;pointer-events:none;background:rgba(16,17,23,.75);padding:0 3px;border-radius:4px;font-variant-numeric:tabular-nums}
   .sh-row.wrong .sh-box{border-color:var(--red);background:rgba(255,69,58,.14)}
   .sh-row.wrong .sh-ans{color:var(--red)}
   .sh-row.wrong .sh-n::after{content:' ✕';color:var(--red)}
   .sh-row.none .sh-ans::before{content:'미작성 · ';font-size:11px;color:var(--sub)}
-  @media (max-width:420px){ .sh-q{font-size:17px} .sh-box,.sh-grid.cols1 .sh-box{width:130px;height:54px} .sh-grid .sh-box.mid,.sh-grid.cols1 .sh-box.mid{width:60px;height:54px} .sh-row{min-height:60px} .sh-grid.cols2{grid-template-columns:1fr;grid-auto-flow:row} }
+  @media (max-width:420px){ .sh-q{font-size:20px} .sh-q.long{font-size:15px} .sh-box,.sh-grid.cols1 .sh-box{flex-basis:140px;height:56px} .sh-grid .sh-box.mid,.sh-grid.cols1 .sh-box.mid{width:60px;height:54px} .sh-row{min-height:60px} .sh-grid.cols2{grid-template-columns:1fr;grid-auto-flow:row} }
   #pq .ctab{font-size:14px}
   #pq .ctab th,#pq .ctab td{padding:7px 6px}
 </style>
