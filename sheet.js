@@ -12,7 +12,7 @@ function sAdd4(){const a=CR(1000,9999),b=CR(1000,9999);return sq(`${a} + ${b} =`
 function sSub4(){let a=CR(1000,9999),b=CR(1000,9999);if(b>a)[a,b]=[b,a];return sq(`${a} − ${b} =`,a-b);}
 /* kind: 0=덧셈 1=뺄셈 (세트 안에서 반반 섞어 배치). 없으면 무작위 */
 function sAddSub4(kind){return (kind===undefined?Math.random()<.5:kind===0)?sAdd4():sSub4();}
-function sMultiAdd(){const n=[0,0,0,0,0].map(()=>CR(10,99));return sq(n.join('+')+' =',n.reduce((x,y)=>x+y,0));}
+function sMultiAdd(){const n=[0,0,0,0,0].map(()=>CR(10,99));return {text:n.join('+')+' =',answer:n.reduce((x,y)=>x+y,0),html:`<span class="sh-2l"><span>${n.slice(0,3).join('+')}</span><span>+${n.slice(3).join('+')} =</span></span>`};} // 두 줄 표시
 function sMul2x1(){const a=CR(11,99),b=CR(2,9);return sq(`${a} × ${b} =`,a*b);}
 function sMul3x1(){const a=CR(100,999),b=CR(2,9);return sq(`${a} × ${b} =`,a*b);}
 function sMul4x1(){const a=CR(1000,9999),b=CR(2,9);return sq(`${a} × ${b} =`,a*b);}
@@ -186,8 +186,8 @@ function enterGrading(st){
     // 정답은 필기 위가 아니라 문제 글자 아래(일반) / 가운데 칸 아래쪽(비교)에 표시. 비교는 큰 쪽 식을 초록으로
     if(p.cmp){row.querySelector('.sh-ans').textContent=p.answer;row.querySelector(p.answer==='>'?'.sh-q.cl':'.sh-q.cr').classList.add('win');}
     else row.querySelector('.sh-a').textContent='= '+String(p.answer);
-    if(st.strokes[i]===0){st.wrong[i]=true;row.classList.add('wrong','none');}
-    row.onclick=()=>{st.wrong[i]=!st.wrong[i];row.classList.toggle('wrong',st.wrong[i]);};
+    if(st.strokes[i]===0){st.wrong[i]=true;row.classList.add('bad','none');} // 'wrong'은 기록실 카드 클래스와 겹쳐 쓰지 않음
+    row.onclick=()=>{st.wrong[i]=!st.wrong[i];row.classList.toggle('bad',st.wrong[i]);};
   });
 }
 function finishSheet(st){
