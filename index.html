@@ -185,11 +185,12 @@
   .sh-grid.cols1{grid-template-columns:minmax(0,1fr)}
   .sh-grid.cols2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .sh-grid>.sh-row{min-width:0}
-  .sh-q{overflow:hidden}
+  .sh-q{overflow:visible}
   /* 문제 글자는 제 폭을 다 차지하고(줄어들지 않음), 답 칸이 필요할 때만 min-width까지 양보한다 */
   .sh-grid.cols2 .sh-box{flex-basis:146px}
   .sh-grid.cols2.t-multiadd .sh-box{min-width:96px}
-  .sh-q .sh-2l{display:flex;flex-direction:column;align-items:flex-end;font-size:19px;line-height:1.06;margin-top:-6px}
+  .sh-q .sh-2l{display:flex;flex-direction:column;align-items:flex-end;font-size:19px;line-height:1.1}
+  .sh-row:has(.sh-2l) .sh-a{bottom:0}
   /* 비교 유형: 왼쪽 식 · [답 칸] · 오른쪽 식. 답(< 또는 >)을 가운데 칸에 쓴다 */
   .sh-row.cmp .sh-q{flex:1 1 0}
   .sh-row.cmp .sh-q.cl{justify-content:flex-end}
@@ -239,9 +240,9 @@
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
-<script src="concepts.js?v=20261126a"></script>
-<script src="practice.js?v=20261126a"></script>
-<script src="sheet.js?v=20261126a"></script>
+<script src="concepts.js?v=20261126b"></script>
+<script src="practice.js?v=20261126b"></script>
+<script src="sheet.js?v=20261126b"></script>
 <script>
 /* ================= 데이터: 문제 유형 정의 ================= */
 // sec: [S,A,B,C] — 문제 1개당 목표시간(초). D는 C 초과. (교재 등급표 비례환산)
@@ -1061,7 +1062,7 @@ function screenSync(){
 /* ================= 시작 ================= */
 screenHome();
 </script>
-<script src="sync-config.js?v=20261126a"></script>
-<script type="module" src="sync.js?v=20261126a"></script>
+<script src="sync-config.js?v=20261126b"></script>
+<script type="module" src="sync.js?v=20261126b"></script>
 </body>
 </html>

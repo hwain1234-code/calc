@@ -100,11 +100,26 @@ function screenSheet(typeId,count){
     document.getElementById('sh-hint').textContent='다 풀면 "끝"을 펜으로 톡';
     document.getElementById('sh-wrap').classList.add('solving');
     document.getElementById('sh-undo').style.display='';
+    fitSheetRows(st); // 화면 세로 여유가 있으면 줄·칸을 키워 채움 (필기 면을 만들기 전에)
     setupInk(st);
   };
   document.getElementById('sh-end').onpointerdown=ev=>{ev.preventDefault();if(st.phase!=='solving')return;st.end=performance.now();st.phase='grading';enterGrading(st);};
   document.getElementById('sh-again').onclick=()=>go(()=>screenSheet(typeId,count));
   document.getElementById('sh-confirm').onclick=()=>finishSheet(st);
+}
+/* 아이패드처럼 세로 여유가 남으면 줄 높이와 답 칸 높이를 키워 화면을 채운다. 한 줄당 최대 +28px */
+function fitSheetRows(st){
+  const hint=document.getElementById('sh-hint'),grid=document.getElementById('sh-grid');if(!hint||!grid)return;
+  const rows=[...grid.querySelectorAll('.sh-row')];if(!rows.length)return;
+  const r0=rows[0];const z=(r0.getBoundingClientRect().width/r0.offsetWidth)||1; // body zoom 보정(뷰포트px → 레이아웃px)
+  const spare=(window.innerHeight-hint.getBoundingClientRect().bottom)/z-10;
+  if(spare<8)return;
+  const perCol=Math.ceil(rows.length/(grid.classList.contains('cols2')&&getComputedStyle(grid).gridTemplateColumns.split(' ').length>1?2:1));
+  const add=Math.min(Math.floor(spare/perCol),28);if(add<2)return;
+  const boxes=[...grid.querySelectorAll('.sh-box')];
+  const rh=rows.map(r=>r.offsetHeight),bh=boxes.map(b=>b.offsetHeight); // 먼저 다 읽고(같은 격자 행끼리 높이를 공유하므로) 나중에 쓴다
+  rows.forEach((r,i)=>r.style.minHeight=(rh[i]+add)+'px');
+  boxes.forEach((b,i)=>b.style.height=(bh[i]+add)+'px');
 }
 /* 답안지 전체를 덮는 필기 면. 종이처럼 아무 데나 쓰고, 첫 획이 어느 문제 줄 위에서 시작됐는지로 시간을 잰다.
    - 캔버스는 답안지보다 사방으로 조금 크게 잡아, 칸 가장자리 바깥에서 시작한 획도 받는다
