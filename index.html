@@ -240,9 +240,9 @@
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
-<script src="concepts.js?v=20261126b"></script>
-<script src="practice.js?v=20261126b"></script>
-<script src="sheet.js?v=20261126b"></script>
+<script src="concepts.js?v=20261126c"></script>
+<script src="practice.js?v=20261126c"></script>
+<script src="sheet.js?v=20261126c"></script>
 <script>
 /* ================= 데이터: 문제 유형 정의 ================= */
 // sec: [S,A,B,C] — 문제 1개당 목표시간(초). D는 C 초과. (교재 등급표 비례환산)
@@ -350,7 +350,7 @@ function screenHome(){
       <div class="stat p"><div class="n">${d.totalSolved||0}</div><div class="l">누적 문제</div></div>
     </div>
     <div class="sec-title">계산 훈련</div>
-    <button class="btn primary big" id="m7"><div class="t"><span class="ic">📝</span>답안지 연습</div><div class="d">책 세트 그대로 펜슬로 쓰고 자가채점 · 13유형 · S 기준 시간</div></button>
+    <button class="btn primary big" id="m7"><div class="t"><span class="ic">📝</span>답안지 연습</div><div class="d">책 세트 그대로 펜슬로 쓰고 자가채점 · 12유형 · S 기준 시간</div></button>
     <button class="btn big" id="m1"><div class="t"><span class="ic y">🎯</span>스킬 드릴</div><div class="d">분수 비교 · 곱셈 비교 한 문제씩 버튼으로</div></button>
     <button class="btn big" id="m2"><div class="t"><span class="ic b">🔀</span>복합 훈련</div><div class="d">분수·곱셈 비교를 섞은 실전 세트</div></button>
     <button class="btn big" id="m3"><div class="t"><span class="ic g">📈</span>기록실</div><div class="d">유형별 최고기록·성장그래프</div></button>
@@ -1061,8 +1061,27 @@ function screenSync(){
 
 /* ================= 시작 ================= */
 screenHome();
+/* 업데이트: 네트워크 우선 서비스 워커 등록 + 앱을 다시 앞으로 가져왔을 때 서버의 index.html이 바뀌었으면 알림/새로고침 */
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+(function(){
+  let tag=null,busy=false;
+  async function check(){
+    if(busy||!navigator.onLine)return;busy=true;
+    try{
+      const r=await fetch(location.pathname.endsWith('/')?location.pathname+'index.html':location.pathname,{method:'HEAD',cache:'no-store'});
+      const t=r.headers.get('etag')||r.headers.get('last-modified');
+      if(t){if(tag===null)tag=t;else if(t!==tag){tag=t;
+        const home=!!document.getElementById('m1'); // 홈 화면이면 바로 새로고침, 아니면 알림만
+        if(home)location.reload();else toast('새 버전이 있어요 · 홈으로 나가면 적용돼요');}}
+    }catch(_){}
+    busy=false;
+  }
+  check();
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
+  window.addEventListener("focus",check);
+})();
 </script>
-<script src="sync-config.js?v=20261126b"></script>
-<script type="module" src="sync.js?v=20261126b"></script>
+<script src="sync-config.js?v=20261126c"></script>
+<script type="module" src="sync.js?v=20261126c"></script>
 </body>
 </html>
